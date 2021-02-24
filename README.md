@@ -12,14 +12,14 @@ I have to use maths and after getting a 1.5 in the examn im not really sure if i
 
 For general, the phisics will have the next rules:
 
-  ⋅⋅*Nothing will rotate. 
-  ⋅⋅*2d plane 
-  ⋅⋅*List with all the objects in the simulator.
+  ⋅⋅* Nothing will rotate. 
+  ⋅⋅* 2d plane 
+  ⋅⋅* List with all the objects in the simulator.
   
 
 # Things to do
-  ⋅⋅*Colissions
-  ⋅⋅*Forces
-  ⋅⋅*Movements
-  ⋅⋅*Light
-  ⋅⋅*Objects
+  ⋅⋅* Colissions
+  ⋅⋅* Forces
+  ⋅⋅* Movements
+  ⋅⋅* Light
+  ⋅⋅* Objects
