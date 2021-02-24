@@ -18,8 +18,8 @@ For general, the phisics will have the next rules:
   
 
 # Things to do
-  ⋅⋅* Colissions
-  ⋅⋅* Forces
-  ⋅⋅* Movements
-  ⋅⋅* Light
-  ⋅⋅* Objects
+  * Colissions
+  * Forces
+  * Movements
+  * Light
+  * Objects
