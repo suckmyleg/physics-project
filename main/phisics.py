@@ -62,6 +62,10 @@ class Phisic:
 
 
 
+	def get_object
+
+
+
 	def get_nearest_object_from_rect(self, rect):
 		for o in self.objects:
 
