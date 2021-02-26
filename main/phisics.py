@@ -41,9 +41,14 @@ class Phisic:
 		AB = self.move_points([rect[0], rect[1]], mx, my)
 		return self.make_rect_from_A_to_B(AB[0], AB[1])
 
-	def move_object(self, objectt, mx, my):
-		for l in objectt:
-			l = self.move_rect(l, mx, my)
+	def move_object(self, objectt, mx, my):	
+		d = self.get_nearest_object_from_object(objectt)
+
+		#print(d[2])
+
+		if d[2] and d[0][2] > 0:
+			for l in objectt:
+				l = self.move_rect(l, mx, my)
 
 
 
@@ -52,7 +57,7 @@ class Phisic:
 
 
 	def make_point(self, P):
-		return np.array([P[0]*self.x, P[1]*self.x, 1])
+		return np.array([P[0]*self.x, P[1]*self.x])
 
 	def make_rect_from_point_to_angle(self, A, alpha, max=50):
 		pass
@@ -72,48 +77,76 @@ class Phisic:
 
 	#DISTANCES
 
+	def get_lengths_of_rect(self, rect):
+		return abs(rect[0][0]), abs(rect[0][1])
+
+
+	def get_distance_xy_beetwen_points(self, A, B):
+		#print("\nGet_distance")
+		#print(A, B)
+		r = B - A
+		#print(r)
+		return abs(r[0]), abs(r[1])
+
+	def get_distance_beetwen_points(self, A, B):
+		AB = B-A
+		return self.get_hipo(AB[0], AB[1])
+
+	def get_points_from_coord(self, rect, l):
+		points = [rect[0], rect[1]]
+		for i in range(l):
+			points.append(np.array([rect[0][0] + rect[2][0]*i, rect[0][1] + rect[2][1]*i]))
+		return points
+
+	def get_points_from_rect(self, rect):
+		dx, dy = self.get_distance_xy_beetwen_points(rect[0], rect[1])
+
+		if dx < dy:
+			dx = dy
+
+		return self.get_points_from_coord(rect, int(abs(4/2)))
+
 
 	def get_distance_from_rect_to_rect(self, rect1, rect2):
+		points1 = self.get_points_from_rect(rect1)
 
-		A = rect1[0]
+		points2 = self.get_points_from_rect(rect2)
 
-		B = rect2[0]
+		#print(points1, points2)
 
-		AB = B - A
+		nearest_points = [False, False, False]
 
-		AB[2] = 1
+		for p in points1:
+			for pp in points2:
+				n = self.get_distance_beetwen_points(p, pp)
 
-		D1 = rect1[2]
+				#print("aaaaa", n, nearest_points[2])
+				if np.array_equal(nearest_points, [False, False, False]):
+					nearest_points = [p, pp, n]
+				else:
+					if n < nearest_points[2]:
+						nearest_points = [p, pp, n]
 
-		D1[2] = 1
-
-		D2 = rect2[2]
-
-		D2[2] = 1
-
-		potencial2 = np.cross(D1, D2)
-
-		#print(potencial2)
-
-		potencial1 = np.linalg.det([AB, D1, D2])
-
-		#print(D1, "\n", D2, "\n")
-
-		divisor = np.sqrt(potencial2[0]**2+potencial2[1]**2+potencial2[2]**2)
-
-		distance = potencial1/divisor
-
-		#print("Distance: {}".format(distance))
-
-		#print("a: {}\nb: {}\nab: {}\nd1: {}\nd2: {}\npotencial1: {}\npotencial2: {}\ndivisor: {}\n".format(A, B, AB, D1, D2, potencial1, potencial2, divisor))
-
-		return distance
+		return nearest_points
 
 
+	def get_hipo(self, c, a):
+		return np.sqrt((c**2)+(a**2))
 
+	def get_nearest_object_from_object(self, objectt):
+		nearest = [False, False, False]
+		for l in objectt:
+			n = self.get_nearest_object_from_rect(l)
 
+			#print("obj", n)
 
+			if np.array_equal(nearest, [False, False, False]):
+				nearest = n
+			else:
+				if not np.array_equal(n, [False, False, False]) and n[0][2] > nearest[0][2]:
+					nearest = n
 
+		return nearest
 
 	def get_nearest_object_from_rect(self, rect):
 		nearest = [False, False, False]
@@ -122,13 +155,13 @@ class Phisic:
 			for l in o:
 				i += 1
 				if not np.array_equal(l, rect):
-					n = self.get_distance_from_rect_to_rect(rect, l)
+					P_PP_N = self.get_distance_from_rect_to_rect(rect, l)
 
 					if not nearest[0]:
-						nearest = [n, l, o]
+						nearest = [P_PP_N, l, o]
 					else:
-						if nearest[0] < n:
-							nearest = [n, l, o]
+						if nearest[0][2] < P_PP_N[2]:
+							nearest = [P_PP_N, l, o]
 		return nearest
 
 
@@ -136,4 +169,3 @@ class Phisic:
 		self.x = x
 		self.objects = []
 		self.new_objects(objects)
-		

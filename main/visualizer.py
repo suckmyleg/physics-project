@@ -1,4 +1,5 @@
 import pygame
+from random import randint as ra
 
 class Graphic:
 	def __init__(self, width=1280, height=720):
@@ -9,8 +10,10 @@ class Graphic:
 		pygame.init()
 		self.screen = pygame.display.set_mode((self.width, self.height))
 
-	def print_line(self, l):
-		pygame.draw.line(self.screen, (255, 0, 0), [l[0][0], l[0][1]], [l[1][0], l[1][1]])
+	def print_line(self, l, color=False):
+		if not color:
+			color = (ra(0, 255), 0, 0)
+		pygame.draw.line(self.screen, color, [l[0][0], l[0][1]], [l[1][0], l[1][1]])
 
 	def print_object(self, o):
 		for l in o:
