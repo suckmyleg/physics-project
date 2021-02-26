@@ -22,12 +22,12 @@ class Phisic:
 
 
 
-
+	#MOVEMENT FUNCTIONS
 
 
 	def move_point(self, A, x, y):
-		A[0] += x
-		A[1] += y
+		A[0] += x*self.x
+		A[1] += y*self.x
 		return A
 
 	def move_points(self, points, mx, my):
@@ -35,17 +35,22 @@ class Phisic:
 			p = self.move_point(p, mx, my)
 		return points
 
+	def move_rect(self, rect, mx, my):
+		AB = self.move_points([rect[0], rect[1]], mx, my)
+		return self.make_rect_from_A_to_B(AB[0], AB[1])
+
+	def move_object(self, objectt, mx, my):
+		for l in objectt:
+			l = self.move_rect(l, mx, my)
+
+
+
+	#MAKE RECTS POINTS 
+
 
 
 	def make_point(self, P):
-		return np.array([P[0]*self.x, P[1]*self.x])
-
-
-	def move_rect(self, rect):
-		AB = self.move_point([rect[0], rect[1]])
-		rect[0] = AB[0]
-		rect[1] = AB[1]
-		return rect
+		return np.array([P[0]*self.x, P[1]*self.x, 0])
 
 	def make_rect_from_point_to_angle(self, A, alpha, max=50):
 		pass
@@ -58,17 +63,41 @@ class Phisic:
 
 
 
-	def get_nearest_rect_from_object(self):
 
 
 
-	def get_object
+
+
+	#DISTANCES
+
+
+	def get_distance_from_rect_to_rect(self, rect1, rect2):
+
+		AB = rect2[0] - rect1[0]
+
+		D1 = rect1[2]
+
+		D2 = rect2[2]
+
+		potencial2 = np.dot(D1, D2)
+
+		#print(potencial2)
+
+		potencial1 = np.linalg.det([AB, D1, D2])
+
+		#print(D1, "\n", D2, "\n")
+
+		return potencial1 / potencial2
+
+
+
+
 
 
 
 	def get_nearest_object_from_rect(self, rect):
 		for o in self.objects:
-
+			pass
 
 
 
