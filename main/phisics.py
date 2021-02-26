@@ -4,7 +4,7 @@ class Phisic:
 
 	def add_object(self, o):
 		print("	Adding object:\n 		{}".format(o))
-		self.objects.append(o)
+		self.objects.append(self.setup_object(o))
 
 	def setup_object(self, o):
 		rects = []
@@ -15,7 +15,7 @@ class Phisic:
 	def new_objects(self, objects):
 		print("Adding objects:")
 		for o in objects:
-			self.add_object(self.setup_object(o))
+			self.add_object(o)
 		print("Done\n")
 
 
@@ -101,10 +101,12 @@ class Phisic:
 	def get_points_from_rect(self, rect):
 		dx, dy = self.get_distance_xy_beetwen_points(rect[0], rect[1])
 
+		print("dx, dy", dx, dy)
+
 		if dx < dy:
 			dx = dy
 
-		return self.get_points_from_coord(rect, int(abs(4/2)))
+		return self.get_points_from_coord(rect, int(abs(8)))
 
 
 	def get_distance_from_rect_to_rect(self, rect1, rect2):
@@ -124,7 +126,7 @@ class Phisic:
 				if np.array_equal(nearest_points, [False, False, False]):
 					nearest_points = [p, pp, n]
 				else:
-					if n < nearest_points[2]:
+					if nearest_points[2] > n:
 						nearest_points = [p, pp, n]
 
 		return nearest_points
