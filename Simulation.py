@@ -5,10 +5,8 @@ try:
 except Exception as e:
 	print(e)
 
-try:
-	controller.main()
-except Exception as e:
-	print(e)
+
+controller.main()
 
 
 input()

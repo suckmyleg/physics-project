@@ -5,6 +5,7 @@ from time import sleep as sl
 class Controller:
 	def __init__(self):
 		self.graphic = Graphic()
+		self.graphic.start_display()
 		self.phisics = Phisic([
 			[
 				[
@@ -26,6 +27,6 @@ class Controller:
 	def main(self):
 		while True:
 			self.show_phisics_objects()
-			print(self.phisics.get_distance_from_rect_to_rect(self.phisics.objects[0][0], self.phisics.objects[1][0]))
+			print(self.phisics.get_nearest_object_from_rect(self.phisics.objects[0][0])[0])
 			self.phisics.move_object(self.phisics.objects[0], 0.01, 0)
 			sl(0.1)
