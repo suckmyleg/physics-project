@@ -14,12 +14,11 @@ class Graphic:
 	def print_line(self, l, color=False):
 		if not color:
 			color = (255, 0, 0)
-		print(l)
 		pygame.draw.line(self.screen, color, [l[0][0], l[0][1]], [l[1][0], l[1][1]])
 
-	def print_object(self, o):
+	def print_object(self, o, color=False):
 		for l in o:
-			self.print_line(l)
+			self.print_line(l, color=color)
 			pygame.display.update()
 
 	def get_position_click(self, start_point=False):
@@ -37,9 +36,9 @@ class Graphic:
 		return [A, self.get_position_click(A)]
 
 
-	def show_objects(self, objects=[]):
+	def show_objects(self, objects=[], color=False):
 		self.screen.fill((0,0,0))
 		for o in objects + self.objects:
-			self.print_object(o)
+			self.print_object(o, color=color)
 		pygame.display.flip()
 		pygame.display.update()

@@ -13,21 +13,6 @@ class Controller:
 			self.graphic.objects.append(o)
 		self.graphic.objects = []
 
-		"""self.phisics = Phisic([
-			[
-				[
-					[3, 4],
-					[5, 6]
-				]
-			],
-			[
-				[
-					[30,0], 
-					[7,200]
-				]
-			]
-			], x=1)"""
-
 	def show_phisics_objects(self):
 		self.graphic.show_objects(self.phisics.objects)
 
@@ -35,8 +20,10 @@ class Controller:
 		while True:
 			self.show_phisics_objects()
 			#print(self.phisics.objects)
-			d = self.phisics.get_nearest_object_from_object(self.phisics.objects[0])
-			print("d", d[0][0], d[0][1])
-			self.graphic.show_objects([[[d[0][0], d[0][1]]]])
-			self.phisics.move_object(self.phisics.objects[0], 1, 0)
-			sl(0.1)
+			#print("d", d[0][0], d[0][1])
+			visuals = []
+			for o in self.phisics.objects:
+				d = self.phisics.move_object(o, 1, 0)
+				visuals.append([[d[0][0], d[0][1]]])
+			self.graphic.objects = visuals
+			#sl(0.1)

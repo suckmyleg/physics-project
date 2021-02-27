@@ -50,6 +50,8 @@ class Phisic:
 			for l in objectt:
 				l = self.move_rect(l, mx, my)
 
+		return d
+
 
 
 	#MAKE RECTS POINTS 
@@ -101,12 +103,12 @@ class Phisic:
 	def get_points_from_rect(self, rect):
 		dx, dy = self.get_distance_xy_beetwen_points(rect[0], rect[1])
 
-		print("dx, dy", dx, dy)
+		#print("dx, dy", dx, dy)
 
 		if dx < dy:
 			dx = dy
 
-		return self.get_points_from_coord(rect, int(abs(8)))
+		return self.get_points_from_coord(rect, int(abs(0)))
 
 
 	def get_distance_from_rect_to_rect(self, rect1, rect2):
@@ -162,7 +164,7 @@ class Phisic:
 					if not nearest[0]:
 						nearest = [P_PP_N, l, o]
 					else:
-						if nearest[0][2] < P_PP_N[2]:
+						if nearest[0][2] > P_PP_N[2]:
 							nearest = [P_PP_N, l, o]
 		return nearest
 
