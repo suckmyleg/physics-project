@@ -54,6 +54,30 @@ class Phisic:
 
 
 
+
+
+
+
+
+
+
+	#GRAVITATIONAL FIELD
+
+	def get_gravity_intensity(self):
+		pass
+
+
+
+
+
+
+
+
+
+
+
+
+
 	#MAKE RECTS POINTS 
 
 
@@ -72,12 +96,39 @@ class Phisic:
 
 
 
+	def get_rect_ect_from_2_points(self, A, B):
+		return -(B[1] - A[1]), (B[0] - A[0]), (A[0]*(B[1] - A[1]) - A[1]*(B[0] - A[0]))
 
-
-
+	def get_ect_from_rect(self, rect):
+		return self.get_rect_ect_from_2_points(rect[0], rect[1])
 
 
 	#DISTANCES
+
+	def get_touch_point(self, rec1, rec2):
+		#Se hace la ecuación de la recta de la primera recta
+		ec1 = self.get_ect_from_rect(rec1)
+
+
+		#la segunda ecuación de la recta
+
+		ec2 = self.get_ect_from_rect(rec2)
+
+
+		#se consigue el valor de y en la segunda ecuacion
+		ec2y = [ec2[0], ec2[2]]/ec2[1]
+
+
+		#igualamos x susituyendo y en la primera ecuación con el valor de la segunda
+		x = ((ec1[1] * ec2y[1]) - ec1[3])/ec1[0] + (ec1[1]*ec2y[0])
+
+
+		#se sustituye x en la ecuacion igualada ec2y por el valor que hemos obtenido
+
+		y = (ec2y[0] * x) + ec2y[1] 
+
+		return [x, y]
+
 
 	def get_lengths_of_rect(self, rect):
 		return abs(rect[0][0]), abs(rect[0][1])
