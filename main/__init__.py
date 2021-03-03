@@ -25,5 +25,12 @@ class Controller:
 			for o in self.phisics.objects:
 				d = self.phisics.move_object(o, 1, 0)
 				visuals.append([[d[0][0], d[0][1]]])
+
+			obj = [[[0,0],self.phisics.get_touch_point(self.phisics.objects[0][0], self.phisics.objects[1][0])]]
+
+			visuals.append(obj)
+
+			print(obj)
+
 			self.graphic.objects = visuals
 			#sl(0.1)
