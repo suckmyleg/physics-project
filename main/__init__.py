@@ -6,8 +6,8 @@ class Controller:
 	def __init__(self):
 		self.graphic = Graphic()
 		self.graphic.start_display()
-		self.phisics = Phisic()
-		for i in range(2):
+		self.phisics = Phisic(objects=[[[1,3], [2, -5]]])
+		for i in range(1):
 			o = [self.graphic.make_rect()]
 			self.phisics.add_object(o)
 			self.graphic.objects.append(o)
