@@ -6,8 +6,8 @@ class Controller:
 	def __init__(self):
 		self.graphic = Graphic()
 		self.graphic.start_display()
-		self.phisics = Phisic(objects=[[[1,3], [2, -5]]])
-		for i in range(1):
+		self.phisics = Phisic(objects=[[[[0, 5], [90, 80]]], [[[0,2], [90, 60]]]])
+		for i in range(0):
 			o = [self.graphic.make_rect()]
 			self.phisics.add_object(o)
 			self.graphic.objects.append(o)
@@ -24,6 +24,7 @@ class Controller:
 			visuals = []
 			for o in self.phisics.objects:
 				d = self.phisics.move_object(o, 1, 0)
+				d[0][1][1] = 100
 				visuals.append([[d[0][0], d[0][1]]])
 
 			obj = [[[0,0],self.phisics.get_touch_point(self.phisics.objects[0][0], self.phisics.objects[1][0])]]
@@ -32,5 +33,5 @@ class Controller:
 
 			print(obj)
 
-			self.graphic.objects = visuals
+			self.graphic.visuals = visuals
 			#sl(0.1)

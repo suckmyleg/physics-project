@@ -6,6 +6,7 @@ class Graphic:
 		self.width = width
 		self.height = height
 		self.objects = []
+		self.visuals = []
 
 	def start_display(self):
 		pygame.init()
@@ -40,5 +41,10 @@ class Graphic:
 		self.screen.fill((0,0,0))
 		for o in objects + self.objects:
 			self.print_object(o, color=color)
+
+		for o in self.visuals:
+			self.print_object(o, color=(250, 250, 0))
+
 		pygame.display.flip()
 		pygame.display.update()
+		self.visuals = []
