@@ -1,3 +1,6 @@
+from os import environ
+environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+
 import pygame
 
 
@@ -7,8 +10,9 @@ class VISUALS:
 			self.debug_function("VISUALS", function_name, args=False)
 
 	def main(self):
-		while True:
-			self.debug("main")
+		self.debug("main")
+
+
 
 	def __init__(self, debug=False):
 		self.debug_function = debug

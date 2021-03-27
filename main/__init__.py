@@ -7,8 +7,8 @@ class Simulation:
 		self.Debug.debug("Simulation", function_name, args)
 
 
-	def __init__(self, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I"):
-		self.Debug = Debug(log=log, debug_mode=debug_mode, debug_reactive=debug_reactive)
+	def __init__(self, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", debug_interval_time=5):
+		self.Debug = Debug(log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, interval_time=debug_interval_time)
 		self.debug("__init__")
 
 		self.phisics = PHISICS(debug=self.Debug.debug)

@@ -1,11 +1,22 @@
 import main
+import sys
 
-Simulation = main.Simulation(log=True, debug_mode=0, debug_reactive="Args: %A Id: %I Function_name: %F")
+debug_mode = 0
 
-Simulation.setup()
+debug_reactive = "Args: %A Id: %I Function_name: %F\n"
 
-Simulation.load(1)
+if len(sys.argv) > 1:
+	debug_mode = 2
+	debug_reactive = sys.argv[1]
 
-Simulation.start()
+Simulation = main.Simulation(log=True, debug_mode=debug_mode, debug_reactive=debug_reactive)
 
-Simulation.visuals.main()
+while True:
+
+	Simulation.setup()
+
+	Simulation.load(1)
+
+	Simulation.start()
+
+	Simulation.visuals.main()
