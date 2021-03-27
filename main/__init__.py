@@ -1,37 +1,88 @@
-from main.phisics import Phisic
-from main.visualizer import Graphic
-from time import sleep as sl
+from main.phisics import *
+from main.visuals import *
+from time import time, sleep
 
-class Controller:
-	def __init__(self):
-		self.graphic = Graphic()
-		self.graphic.start_display()
-		self.phisics = Phisic(objects=[[[[0, 5], [90, 80]]], [[[0,2], [90, 60]]]])
-		for i in range(0):
-			o = [self.graphic.make_rect()]
-			self.phisics.add_object(o)
-			self.graphic.objects.append(o)
-		self.graphic.objects = []
+class Debug:
+	def time_passed(self):
+		return int(time() - self.start_time)
 
-	def show_phisics_objects(self):
-		self.graphic.show_objects(self.phisics.objects)
+	def space(self):
+		pass
 
-	def main(self):
-		while True:
-			self.show_phisics_objects()
-			#print(self.phisics.objects)
-			#print("d", d[0][0], d[0][1])
-			visuals = []
-			for o in self.phisics.objects:
-				d = self.phisics.move_object(o, 1, 0)
-				d[0][1][1] = 100
-				visuals.append([[d[0][0], d[0][1]]])
+	def clean_args(self, args, s="(", e=")"):
+		if args:
+			args = "{}{}{}".format(s, args, e)
+		else:
+			args = "{}{}".format(s, e)
+		return args
 
-			obj = [[[0,0],self.phisics.get_touch_point(self.phisics.objects[0][0], self.phisics.objects[1][0])]]
+	def deb_2(self, main, function_name, args):
 
-			visuals.append(obj)
+		datas = [
+		["%M", main],
+		["%F", function_name],
+		["%A", args],
+		["%T", self.time_passed()],
+		["%I", self.debug_n]
+		]
 
-			print(obj)
+		t = self.reactive_deb
 
-			self.graphic.visuals = visuals
-			#sl(0.1)
+		for d in datas:
+
+			t = t.replace(d[0], str(d[1]))
+
+		print(t)
+
+	def deb_1(self, main, function_name, args):
+		args = self.clean_args(args)
+
+		print("")
+
+	def deb_0(self, main, function_name, args):
+		args = self.clean_args(args)
+
+		print("[{}] {} {}.{}{}".format(self.debug_n, self.time_passed(), main, function_name, args))
+
+	def debug(self, main, function_name, args=False):
+		if self.display_log:
+
+			self.debug_n += 1
+				
+			self.modes[self.debug_mode](main, function_name, args)
+
+	def __init__(self, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I"):
+		self.display_log = log
+		self.start_time = time()
+		self.debug_n = 0
+		self.debug_mode = debug_mode
+		self.modes = [self.deb_0, self.deb_1, self.deb_2]
+		self.reactive_deb = debug_reactive
+
+
+
+
+class Simulation:
+	def debug(self, function_name, args=False):
+		self.Debug.debug("Simulation", function_name, args)
+
+
+	def __init__(self, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I"):
+		self.Debug = Debug(log=log, debug_mode=debug_mode, debug_reactive=debug_reactive)
+		self.debug("__init__")
+
+
+		self.phisics = PHISICS(debug=self.Debug.debug)
+		self.visuals = VISUALS(debug=self.Debug.debug)
+
+
+	def setup(self):
+		self.debug("setup")
+
+	def load(self, lvl):
+		self.debug("load", args=[lvl])
+
+		
+
+	def start(self):
+		self.debug("start")
