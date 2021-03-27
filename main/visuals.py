@@ -7,7 +7,8 @@ class VISUALS:
 			self.debug_function("VISUALS", function_name, args=False)
 
 	def main(self):
-		self.debug("main")
+		while True:
+			self.debug("main")
 
 	def __init__(self, debug=False):
 		self.debug_function = debug

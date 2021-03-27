@@ -1,6 +1,6 @@
 sudo apt-get install python3
 
-sudo apt-get install python-pip
+sudo apt-get install python3-pip
 
 sudo pip install -r requirements.txt
 
