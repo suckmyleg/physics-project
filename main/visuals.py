@@ -1,4 +1,4 @@
-import tkinter
+import pygame
 
 
 class VISUALS:
