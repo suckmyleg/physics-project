@@ -132,7 +132,7 @@ class VISUALS:
 		self.font_size = font_size
 		self.myFont = pygame.font.SysFont('arial', self.font_size, True, False)
 
-	def __init__(self, width=1080, height=720, debug=False, fps=60, show_debug=False):
+	def __init__(self, width=1920, height=1080, debug=False, fps=60, show_debug=False):
 		self.show_debug = show_debug
 		self.debug_c = debug
 		self.debug("__init__")

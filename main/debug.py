@@ -123,6 +123,8 @@ class Debug:
 
 	def __init__(self, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", interval_time=5, output_console=False):
 		self.display_log = log
+		if not self.display_log:
+			output_console = False
 		self.output_console = output_console
 		self.start_time = time()
 		self.start_time_interval = time()

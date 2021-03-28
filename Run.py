@@ -1,11 +1,11 @@
 import main
 import sys
 
-debug_mode = 4
+debug_mode = 3
 
 debug_reactive = "Args: %A Id: %I Function_name: %F\n"
 
-log = True
+log = False
 
 if len(sys.argv) > 1:
 
@@ -29,7 +29,7 @@ keys_map = [
 		["k_hold", "k_s", "player_move_back"]
 		]
 
-Simulation = main.Simulation(log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, fps=5, keys_map=keys_map)
+Simulation = main.Simulation(log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, fps=60, keys_map=keys_map, output_console=True)
 
 Simulation.setup()
 

@@ -10,10 +10,8 @@ class Simulation:
 
 	def main(self):
 		for i in range(10000):
-			if not self.pause:
-				actions = self.visuals.reload(self.phisics.objects)
-			else:
-				actions = self.visuals.reload(self.phisics.objects)
+			self.player_move_right()
+			actions = self.visuals.reload(self.phisics.objects)
 			self.handle_events(actions)
 			self.debug("main", sep="Reload")
 
