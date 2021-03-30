@@ -5,10 +5,6 @@ import pygame
 from time import sleep
 
 class VISUALS:
-	def debug(self, function_name, args=False, sep=False):
-		if self.debug_c:
-			self.debug_c.debug("VISUALS", function_name, args=args, sep=sep)
-
 	def main(self):
 		self.debug("main")
 
@@ -59,8 +55,7 @@ class VISUALS:
 	def show_message(self, message, deb=True):
 		if deb:
 			self.debug("show_message")
-		message = str(message)
-		label = self.myFont.render(message, True, (0,128,255))
+		label = self.myFont.render(str(message), True, (0,128,255))
 		self.screen.blit(label, (10, self.message_n*self.font_size + self.font_default_height))
 		self.message_n += 1
 
@@ -74,7 +69,8 @@ class VISUALS:
 	def debug_info(self):
 		self.debug("debug_info")
 		messages = copy.deepcopy(self.debug_c.messages)
-		messages[0] = ""
+		if len(messages) > 0 and False:
+			messages[0] = ""
 		self.show_messages(messages)
 
 	def mouse_info(self):
@@ -130,11 +126,12 @@ class VISUALS:
 			if font_size > 33:
 				font_size = 33
 		self.font_size = font_size
-		self.myFont = pygame.font.SysFont('arial', self.font_size, True, False)
+		self.myFont = pygame.font.SysFont('monospace', self.font_size, True, False)
 
-	def __init__(self, width=1920, height=1080, debug=False, fps=60, show_debug=False):
+	def __init__(self, width=1920, height=1080, debug=False, debug_mode=5, fps=60, show_debug=False):
 		self.show_debug = show_debug
 		self.debug_c = debug
+		self.debug = self.debug_c.get_debug("VISUALS", debug_mode)
 		self.debug("__init__")
 		self.width = width
 		self.height = height

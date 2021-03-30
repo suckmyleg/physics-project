@@ -5,14 +5,12 @@ import time
 import copy
 
 class Simulation:
-	def debug(self, function_name, args=False, sep=False, error=False):
-		self.Debug.debug("Simulation", function_name, args, sep=sep, error=error)
-
 	def main(self):
+		actions = []
 		for i in range(10000):
+			self.handle_events(actions)
 			self.player_move_right()
 			actions = self.visuals.reload(self.phisics.objects)
-			self.handle_events(actions)
 			self.debug("main", sep="Reload")
 
 
@@ -40,12 +38,12 @@ class Simulation:
 		self.debug("debug_zoom_out")
 		self.visuals.change_font_size(self.visuals.font_size - 1)
 
-	def debug_down(self):
-		self.debug("debug_down")
-		self.visuals.font_default_height -= 1
-
 	def debug_up(self):
 		self.debug("debug_up")
+		self.visuals.font_default_height -= 1
+
+	def debug_down(self):
+		self.debug("debug_down")
 		self.visuals.font_default_height += 1
 
 	def switch_debug(self):
@@ -56,7 +54,7 @@ class Simulation:
 			self.visuals.show_debug = True
 
 	def switch_pause(self):
-		self.debug("handle_events")
+		self.debug("switch_pause")
 		if self.pause:
 			self.pause = False
 		else:
@@ -136,16 +134,20 @@ class Simulation:
 			self.controlls.append(self.setup_key(k))
 
 
-	def __init__(self, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", debug_interval_time=1, fps=60, keys_map=False, output_console=True):
+	def __init__(self, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", debug_interval_time=5, fps=60, keys_map=False, output_console=True):
+
 		self.Debug = Debug(log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, interval_time=debug_interval_time, output_console=output_console)
+
+		self.debug = self.Debug.get_debug("Simulation", debug_mode)
+
 		self.debug("__init__", sep="Start")
 
-		self.phisics = PHISICS(debug=self.Debug.debug)
-		self.visuals = VISUALS(debug=self.Debug, fps=fps)
+		self.phisics = PHISICS(debug=self.Debug, debug_mode=debug_mode)
+		self.visuals = VISUALS(debug=self.Debug, debug_mode=debug_mode, fps=fps)
 
 		self.pause = False
 
-		self.debug_mode = False
+		self.debug_mode = debug_mode
 
 		self.keys_map = keys_map
 		

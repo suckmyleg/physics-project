@@ -2,10 +2,6 @@ import numpy as np
 import copy
 
 class PHISICS:
-	def debug(self, function_name, args=False, sep=False):
-		if self.debug_function:
-			self.debug_function("PHISICS", function_name, args=False, sep=sep)
-
 	def main(self):
 		self.debug("main")
 
@@ -81,8 +77,8 @@ class PHISICS:
 			self.objects.append(self.create_object(o))
 		return objects
 
-	def __init__(self, debug=False):
-		self.debug_function = debug
+	def __init__(self, debug, debug_mode):
+		self.debug = debug.get_debug("PHISICS", debug_mode)
 		self.debug("__init__")
 
 		self.objects = []

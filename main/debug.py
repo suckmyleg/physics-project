@@ -1,5 +1,15 @@
 from time import time, sleep
 
+class Minidebug:
+	def __init__(self, main, mode, debug_reactive, fun):
+		self.main = main
+		self.mode = mode
+		self.debug_reactive = debug_reactive
+		self.function = fun
+
+	def debug(self, function_name, args=[], error=False, sep=False):
+		self.function(self.main, function_name, args, error=error, debug_reactive=self.debug_reactive, mode=self.mode, sep=sep)
+
 class Debug:
 	def time_passed_float(self):
 		return time() - self.start_time
@@ -7,8 +17,13 @@ class Debug:
 	def time_passed(self):
 		return int(self.time_passed_float()*100)/100
 
-	def space(self):
-		pass
+	def space(self, m1, m2, space_length=50, spacer=" "):
+		t = ""
+		length = space_length - len(m1)
+		if length > 0:
+			t = spacer*length
+		return "{}{}{}".format(m1, t, m2)
+			 
 
 	def clean_args(self, args, s="(", e=")"):
 		if args:
@@ -61,17 +76,26 @@ class Debug:
 		if self.output_console:
 			print(m)
 
-	def deb_4(self, main, function_name, args, error=False):
+	def deb_5(self, main, function_name, args, error=False, debug_reactive=""):
+		args = self.clean_args(args)
+
+		i1 = "{}.{}{} ".format(main, function_name, args)
+
+		i2 = self.space(self.space(f"t:[{self.ceros(self.time_passed_float())}]", f"m:[{self.media()}/s]", space_length=12), f"mi:[{self.interval_media()}/s]", space_length=25)
+
+		self.pr(self.space(i1, i2, space_length=45), error=error)
+
+	def deb_4(self, main, function_name, args, error=False, debug_reactive=""):
 		args = self.clean_args(args)
 
 		self.pr("[{}] {}.{}{}".format(int(self.time_passed_float()), main, function_name, args), error=error)
 
-	def deb_3(self, main, function_name, args, error=False):
+	def deb_3(self, main, function_name, args, error=False, debug_reactive=""):
 		args = self.clean_args(args)
 
 		self.pr("[{}/s] [{}] [{}] {}.{}{}".format(self.interval_media(), self.debug_n, self.ceros(self.time_passed_float()), main, function_name, args), error=error)
 
-	def deb_2(self, main, function_name, args, reactive_deb=False, error=False):
+	def deb_2(self, main, function_name, args, debug_reactive=False, error=False):
 
 		if not args:
 			args = ""
@@ -87,9 +111,9 @@ class Debug:
 		["%S", self.media, True]
 		]
 
-		if not reactive_deb:
-			reactive_deb = self.reactive_deb
-		t = reactive_deb
+		if not debug_reactive:
+			debug_reactive = self.debug_reactive
+		t = debug_reactive
 
 		for d in datas:
 			r = d[1]
@@ -99,17 +123,19 @@ class Debug:
 
 		self.pr(t, error=error)
 
-	def deb_1(self, main, function_name, args, error=False):
+	def deb_1(self, main, function_name, args, error=False, debug_reactive=""):
 		args = self.clean_args(args)
 
 		self.pr("[{}/s] [{}] [{}] {}.{}{}".format(self.media(), self.debug_n, self.time_passed(), main, function_name, args), error=error)
 
-	def deb_0(self, main, function_name, args, error=False):
+	def deb_0(self, main, function_name, args, error=False, debug_reactive=""):
 		args = self.clean_args(args)
 
 		self.pr("[{}] {} {}.{}{}".format(self.debug_n, self.time_passed(), main, function_name, args), error=error)
 
-	def debug(self, main, function_name, args=False, sep=False, error=False):
+	def debug(self, main, function_name, args=False, sep=False, error=False, mode=False, debug_reactive=""):
+		if not mode:
+			mode = self.debug_mode
 		if self.display_log:
 
 			self.debug_n += 1
@@ -119,7 +145,11 @@ class Debug:
 				self.messages = []
 				self.pr("\n-------{}".format(sep))
 
-			self.modes[self.debug_mode](main, function_name, args, error=error)
+			self.modes[mode](main, function_name, args, error=error, debug_reactive=debug_reactive)
+
+	def get_debug(self, main, mode, reactive=""):
+		d = Minidebug(main, mode, reactive, self.debug)
+		return d.debug
 
 	def __init__(self, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", interval_time=5, output_console=False):
 		self.display_log = log
@@ -132,6 +162,6 @@ class Debug:
 		self.debug_n_interval = 0
 		self.interval_time = interval_time
 		self.debug_mode = debug_mode
-		self.modes = [self.deb_0, self.deb_1, self.deb_2, self.deb_3, self.deb_4]
-		self.reactive_deb = debug_reactive
+		self.modes = [self.deb_0, self.deb_1, self.deb_2, self.deb_3, self.deb_4, self.deb_5]
+		self.debug_reactive = debug_reactive
 		self.messages = []
