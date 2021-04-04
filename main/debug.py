@@ -60,19 +60,43 @@ class Debug:
 
 		return a
 
-	def ceros(self, t):
-		t = str(int(t*100))
+	def ceros(self, t, c=2):
+		t = str(int(t*(10*c)))
 
 		ll = len(t) - 2
 
 		return t[:ll] + '.' + t[ll:]
 
+	def search_error(self, error_to_search):
+		error = False
+		i = -1
+		for e in self.errors:
+			i += 1
+			if e[0] == error_to_search[0] and e[1] == error_to_search[1] and e[2] == error_to_search[2]:
+				error = True
+				break
+		return error, i
 
 
-	def pr(self, m, error=False):
+	def add_error(self, main, function_name, error):
+		e = [main, function_name, str(error), 1, self.ceros(self.time_passed_float())]
+
+		exists, id = self.search_error(e)
+
+		if not exists:
+			self.errors.append(e)
+			print(e)
+		else:
+			self.errors[id][3] += 1
+			self.errors[id][4] = self.ceros(self.time_passed_float())
+
+	def pr(self, m, main="", function_name="", args=[], error=False, debug_reactive=""):
 		if error:
 			m = m + " - ERROR: " + str(error)
+			self.add_error(main, function_name, error)
+
 		self.messages.append(m)
+		self.file.write(m + "\n")
 		if self.output_console:
 			print(m)
 
@@ -83,12 +107,12 @@ class Debug:
 
 		i2 = self.space(self.space(f"t:[{self.ceros(self.time_passed_float())}]", f"m:[{self.media()}/s]", space_length=12), f"mi:[{self.interval_media()}/s]", space_length=25)
 
-		self.pr(self.space(i1, i2, space_length=45), error=error)
+		self.pr(self.space(i1, i2, space_length=45), main, function_name, args, error=error, debug_reactive=debug_reactive)
 
 	def deb_4(self, main, function_name, args, error=False, debug_reactive=""):
 		args = self.clean_args(args)
 
-		self.pr("[{}] {}.{}{}".format(int(self.time_passed_float()), main, function_name, args), error=error)
+		self.pr("[{}] {}.{}{}".format(int(self.time_passed_float()), main, function_name, args), main, function_name, args, error=error, debug_reactive=debug_reactive)
 
 	def deb_3(self, main, function_name, args, error=False, debug_reactive=""):
 		args = self.clean_args(args)
@@ -121,17 +145,17 @@ class Debug:
 				r = r()
 			t = t.replace(d[0], str(r))
 
-		self.pr(t, error=error)
+		self.pr(t, main, function_name, args, error=error, debug_reactive=debug_reactive)
 
 	def deb_1(self, main, function_name, args, error=False, debug_reactive=""):
 		args = self.clean_args(args)
 
-		self.pr("[{}/s] [{}] [{}] {}.{}{}".format(self.media(), self.debug_n, self.time_passed(), main, function_name, args), error=error)
+		self.pr("[{}/s] [{}] [{}] {}.{}{}".format(self.media(), self.debug_n, self.time_passed(), main, function_name, args), main, function_name, args, error=error, debug_reactive=debug_reactive)
 
 	def deb_0(self, main, function_name, args, error=False, debug_reactive=""):
 		args = self.clean_args(args)
 
-		self.pr("[{}] {} {}.{}{}".format(self.debug_n, self.time_passed(), main, function_name, args), error=error)
+		self.pr("[{}] {} {}.{}{}".format(self.debug_n, self.time_passed(), main, function_name, args), main, function_name, args, error=error, debug_reactive=debug_reactive)
 
 	def debug(self, main, function_name, args=False, sep=False, error=False, mode=False, debug_reactive=""):
 		if not mode:
@@ -165,3 +189,5 @@ class Debug:
 		self.modes = [self.deb_0, self.deb_1, self.deb_2, self.deb_3, self.deb_4, self.deb_5]
 		self.debug_reactive = debug_reactive
 		self.messages = []
+		self.errors = []
+		self.file = open("log.txt", "w")

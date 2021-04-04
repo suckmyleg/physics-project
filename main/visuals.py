@@ -5,8 +5,15 @@ import pygame
 from time import sleep
 
 class VISUALS:
-	def main(self):
-		self.debug("main")
+	def draw_rect(self, l, color):
+		self.debug("draw_rect")
+		if l["color"]:
+			color = color
+
+		if self.show_debug:
+			self.show_message("l: {}".format(l))
+
+		pygame.draw.rect(self.screen, color, pygame.Rect(l["x"], l["y"], l["h"], l["w"]))
 
 	def draw_line(self, l, color):
 		self.debug("draw_line")
@@ -22,10 +29,11 @@ class VISUALS:
 	def draw_object(self, o):
 		self.debug("draw_object")
 		visual = o["visual"]
-		color = visual["color"]
 
-		for l in visual["body"]:
-			self.draw_line(l, color)
+		if visual["visible"]:
+			color = visual["color"]
+			
+			self.draw_rect(visual["body"], color)
 
 	def get_highest_layer(self, objects):
 		self.debug("get_highest_layer", args=len(objects))
@@ -65,25 +73,49 @@ class VISUALS:
 			self.mouse_info()
 			self.screen_info()
 			self.debug_info()
+			self.debug_errors()
+
+	def show_messages_folder(self, title, messages, fun=False):
+		if not fun:
+			fun = self.show_messages
+
+		self.show_message("")
+		self.show_message("{}:".format(title))
+		fun(messages)
+
+
+	def show_errors(self, errors):
+		self.debug("show_errors")
+		for m in errors:
+			m = "[{}.{}()] [{}][{}] Exception => {}".format(m[0], m[1], m[4], m[3], m[2])
+			self.show_message(m)
+
+	def debug_errors(self):
+		self.debug("debug_errors")
+		messages = copy.deepcopy(self.debug_c.errors)
+		self.show_messages_folder("Errors", messages, fun=self.show_errors)
 
 	def debug_info(self):
 		self.debug("debug_info")
 		messages = copy.deepcopy(self.debug_c.messages)
-		if len(messages) > 0 and False:
-			messages[0] = ""
-		self.show_messages(messages)
+		if len(messages) > 0 and True:
+			del messages[0]
+		self.show_messages_folder("Calls", messages)
 
 	def mouse_info(self):
 		self.debug("mouse_info")
 		x,y = pygame.mouse.get_pos()
-		self.show_message("mouse coords: {}, {}".format(str(x), str(y)))
+		messages = ["mouse coords: {}, {}".format(str(x), str(y))]
+		self.show_messages_folder("Input", messages)
 
 	def screen_info(self):
 		self.debug("screen_info")
-		self.show_message("screen: {}x{}".format(self.width, self.height))
-		self.show_message("fps: {}".format(self.fps))
-		self.show_message("debug_size: {}".format(self.font_size))
-		self.show_message("debug_mode: {}".format(self.debug_c.debug_mode))
+		messages = ["resolution: {}x{}".format(self.width, self.height), 
+		"fps: {}".format(self.fps), 
+		"debug_size: {}".format(self.font_size), 
+		"debug_mode: {}".format(self.debug_c.debug_mode)]
+		self.show_messages_folder("Screen", messages)
+
 
 	def update_screen(self):
 		self.debug("update_screen")
@@ -98,9 +130,9 @@ class VISUALS:
 		self.debug("reload")
 		actions = self.get_actions()
 		self.clear_screen()
-		self.info()
 		if objects:
 			self.draw_objects(objects)
+		self.info()
 		self.update_screen()
 		self.fpsClock.tick(self.fps)
 		return actions
@@ -110,13 +142,16 @@ class VISUALS:
 		return pygame.event.get()
 
 	def draw_objects(self, phisics_objects):
-		objects = copy.deepcopy(phisics_objects)
-		self.debug("draw_objects", args=len(objects))
+		try:
+			objects = copy.deepcopy(phisics_objects)
+			self.debug("draw_objects")
 
-		self.show_message("")
+			self.show_message("")
 
-		for o in self.order_objects_by_layers(objects):
-			self.draw_object(o)
+			for o in objects:#self.order_objects_by_layers(objects):
+				self.draw_object(o)
+		except Exception as e:
+			self.debug("draw_object", error=e)
 
 	def change_font_size(self, font_size):
 		self.debug("change_font_size")

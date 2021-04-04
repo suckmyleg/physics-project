@@ -1,0 +1,59 @@
+{"level_name":"testing",
+"objects":[
+  {
+    "visual": {
+      "layer": 1,
+      "color": [
+        150,
+        1,
+        1
+      ],
+      "visible": true,
+      "body": {
+        "x": 5,
+        "y": 5,
+        "h": 100,
+        "w": 100,
+        "color": false
+      }
+    },
+    "collider": {
+      "mass": 1,
+      "static": true,
+      "body": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0
+      }
+    }
+  },
+  {
+    "visual": {
+      "layer": 1,
+      "color": [
+        150,
+        1,
+        1
+      ],
+      "visible": true,
+      "body": {
+        "x": 600,
+        "y": 5,
+        "h": 100,
+        "w": 100,
+        "color": false
+      }
+    },
+    "collider": {
+      "mass": 1,
+      "static": true,
+      "body": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0
+      }
+    }
+  }
+]}
