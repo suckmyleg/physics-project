@@ -61,7 +61,7 @@ class Debug:
 		return a
 
 	def ceros(self, t, c=2):
-		t = str(int(t*(10*c)))
+		t = str(int(t*(10**c)))
 
 		ll = len(t) - 2
 
@@ -96,7 +96,8 @@ class Debug:
 			self.add_error(main, function_name, error)
 
 		self.messages.append(m)
-		self.file.write(m + "\n")
+		if self.output_file:
+			self.file.write(m + "\n")
 		if self.output_console:
 			print(m)
 
@@ -158,24 +159,27 @@ class Debug:
 		self.pr("[{}] {} {}.{}{}".format(self.debug_n, self.time_passed(), main, function_name, args), main, function_name, args, error=error, debug_reactive=debug_reactive)
 
 	def debug(self, main, function_name, args=False, sep=False, error=False, mode=False, debug_reactive=""):
-		if not mode:
-			mode = self.debug_mode
-		if self.display_log:
+		if self.debug_active:
+			if not mode:
+				mode = self.debug_mode
+			if self.display_log:
 
-			self.debug_n += 1
-			self.debug_n_interval += 1
-				
-			if sep:
-				self.messages = []
-				self.pr("\n-------{}".format(sep))
+				self.debug_n += 1
+				self.debug_n_interval += 1
+					
+				if sep:
+					self.messages = []
+					self.pr("\n-------{}".format(sep))
 
-			self.modes[mode](main, function_name, args, error=error, debug_reactive=debug_reactive)
+				self.modes[mode](main, function_name, args, error=error, debug_reactive=debug_reactive)
 
 	def get_debug(self, main, mode, reactive=""):
 		d = Minidebug(main, mode, reactive, self.debug)
 		return d.debug
 
-	def __init__(self, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", interval_time=5, output_console=False):
+	def __init__(self, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", interval_time=5, output_console=False, output_file=False):
+		self.debug_active = True
+		self.output_file = output_file
 		self.display_log = log
 		if not self.display_log:
 			output_console = False

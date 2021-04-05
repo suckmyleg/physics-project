@@ -31,28 +31,32 @@ class CONTROLLS:
 		else:
 			self.pause = True
 
+	def reload_lvl(self):
+		self.debug("reload_lvl")
+		self.main.reload_lvl()
+
 
 	#PLAYER CONTROLLS
 
 	def object_move_forward(self, object_id=0):
 		if not self.pause:
 			self.debug("object_move_forward")
-			self.phisics.move_rect(self.phisics.objects[object_id], 0, -5)
+			self.phisics.push_rect(self.phisics.objects[object_id], 0, -0.1)
 
 	def object_move_back(self, object_id=0):
 		if not self.pause:
 			self.debug("object_move_back")
-			self.phisics.move_rect(self.phisics.objects[object_id], 0, 5)
+			self.phisics.push_rect(self.phisics.objects[object_id], 0, 0.1)
 
 	def object_move_left(self, object_id=0):
 		if not self.pause:
 			self.debug("object_move_left")
-			self.phisics.move_rect(self.phisics.objects[object_id], -5, 0)
+			self.phisics.push_rect(self.phisics.objects[object_id], -0.1, 0)
 
 	def object_move_right(self, object_id=0):
 		if not self.pause:
 			self.debug("object_move_right")
-			self.phisics.move_rect(self.phisics.objects[object_id], 5, 0)
+			self.phisics.push_rect(self.phisics.objects[object_id], 0.1, 0)
 
 	def uknown_command(self):
 		self.debug("uknown_command")
@@ -82,26 +86,64 @@ class CONTROLLS:
 		self.debug("setup_controlls")
 
 		for k in keys_map:
-			self.controlls.append(self.setup_key(k))
+			data = self.setup_key(k)
+			self.controlls[str(data[1])] = {"type":data[0], "function":data[2]}
 
-			
+
+	def get_function_from_command(self, command):
+		return self.commands[command]
+
+	def execute_command(self, command):
+		self.get_function_from_command(command)()
+
+	def active_command(self, command):
+		if not command in self.active_commands:
+			self.active_commands.append(command)
+
+	def inactive_command(self, command):
+		if command in self.active_commands:
+			del self.active_commands[self.active_commands.index(command)]
+
+	def get_type_of_event(self, event):
+		for t in self.types.keys():
+			if event.type in self.types[t]:
+				return t
+
+	def get_value_from_event(self, e, event_type):
+		if event_type == "scroll":
+			return e.button
+		else:
+			if event_type in ["k_down", "k_up"]:
+				return e.key
+			else:
+				return False
+
 	def handle_events(self, events):
 		self.debug("handle_events")
 		for e in events:
-			for c in self.controlls:
-				if c[0] == e.type or c[0] == "k_hold":
-					if c[0] == self.types["scroll"]:
-						key = e.button
-					else:
-						try:
-							key = e.key
-						except:
-							if c[0] == "k_hold":
-								key = e
+			event_type = self.get_type_of_event(e)
+			value = self.get_value_from_event(e, event_type)
 
-					if key == c[1]:
-						c[2]()
-						break
+			#print("\n", event_type, value)
+
+			if value:
+				try:
+					data = self.controlls[str(value)]
+				except:
+					pass
+				else:
+					if "k_hold" in data["type"]:
+						if event_type == "k_down":
+							self.active_command(data["function"])
+						else:
+							if event_type == "k_up":
+								self.inactive_command(data["function"])
+					else:
+						if event_type in data["type"]:
+							data["function"]()
+
+		for c in self.active_commands:
+			c()
 
 
 
@@ -117,13 +159,15 @@ class CONTROLLS:
 
 		self.keys_map = keys_map
 		
-		self.types = {"scroll":pygame.MOUSEBUTTONDOWN, "k_down":pygame.KEYDOWN, "k_up":pygame.KEYUP, "k_hold":"k_hold"}
+		self.types = {"scroll":[pygame.MOUSEBUTTONDOWN], "k_down":[pygame.KEYDOWN], "k_up":[pygame.KEYUP], "k_hold":[pygame.KEYDOWN, pygame.KEYUP, "k_hold"], "click":[pygame.MOUSEBUTTONDOWN]}
 
-		self.keys = {"k_down":pygame.K_DOWN, "k_up":pygame.K_UP, "k_space":pygame.K_SPACE, "k_rshift":pygame.K_RSHIFT, "k_escape":pygame.K_ESCAPE, "k_a":pygame.K_a, "k_s":pygame.K_s, "k_d":pygame.K_d, "k_w":pygame.K_w}
+		self.keys = {"k_down":pygame.K_DOWN, "k_up":pygame.K_UP, "k_space":pygame.K_SPACE, "k_rshift":pygame.K_RSHIFT, "k_escape":pygame.K_ESCAPE, "k_a":pygame.K_a, "k_s":pygame.K_s, "k_d":pygame.K_d, "k_w":pygame.K_w, "k_r":pygame.K_r}
 
-		self.commands = {"object_move_forward":self.object_move_forward, "object_move_back":self.object_move_back, "object_move_left":self.object_move_left, "object_move_right":self.object_move_right, "switch_pause":self.switch_pause, "zoom_in":self.debug_zoom_in, "zoom_out":self.debug_zoom_out, "debug_down":self.debug_down, "debug_up":self.debug_up, "switch_debug":self.switch_debug}
+		self.commands = {"reload_lvl":self.reload_lvl, "object_move_forward":self.object_move_forward, "object_move_back":self.object_move_back, "object_move_left":self.object_move_left, "object_move_right":self.object_move_right, "switch_pause":self.switch_pause, "zoom_in":self.debug_zoom_in, "zoom_out":self.debug_zoom_out, "debug_down":self.debug_down, "debug_up":self.debug_up, "switch_debug":self.switch_debug}
 		
-		self.controlls = []
+		self.active_commands = [] 
+
+		self.controlls = {}
 
 		self.actions = []
 

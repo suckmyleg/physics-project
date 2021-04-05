@@ -26,6 +26,19 @@ class VISUALS:
 		pygame.draw.line(self.screen, color, l["A"], l["B"])
 
 
+	def draw_actual_speed(self, x, y, x0, y0, ix, iy):
+		self.debug("draw_actual_speed")
+		color = (0, 250, 0)
+
+		labelx = self.myFont.render("x: " + str(x), True, (0,128,255))
+		self.screen.blit(labelx, (ix, -2*self.font_size + iy - 0.5))
+
+		labely = self.myFont.render("y: " + str(y), True, (0,128,255))
+		self.screen.blit(labely, (ix, -1*self.font_size + iy - 0.5))
+
+		pygame.draw.line(self.screen, color, [x0, y0], [x0+x*10, y0])
+		pygame.draw.line(self.screen, color, [x0, y0], [x0, y0+y*10])
+
 	def draw_object(self, o):
 		self.debug("draw_object")
 		visual = o["visual"]
@@ -34,6 +47,8 @@ class VISUALS:
 			color = visual["color"]
 			
 			self.draw_rect(visual["body"], color)
+
+			self.draw_actual_speed(o["collider"]["movement"]["x"], o["collider"]["movement"]["y"], o["collider"]["body"]["vectors"][4][0], o["collider"]["body"]["vectors"][4][1], o["collider"]["body"]["x"], o["collider"]["body"]["y"])
 
 	def get_highest_layer(self, objects):
 		self.debug("get_highest_layer", args=len(objects))

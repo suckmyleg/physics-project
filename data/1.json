@@ -11,7 +11,7 @@
       "visible": true,
       "body": {
         "x": 5,
-        "y": 5,
+        "y": 600,
         "h": 100,
         "w": 100,
         "color": false
@@ -19,12 +19,12 @@
     },
     "collider": {
       "mass": 1,
-      "static": true,
+      "static": false,
       "body": {
-        "x": 0,
-        "y": 0,
-        "w": 0,
-        "h": 0
+        "x": 5,
+        "y": 600,
+        "w": 100,
+        "h": 100
       }
     }
   },
@@ -39,7 +39,7 @@
       "visible": true,
       "body": {
         "x": 600,
-        "y": 5,
+        "y": 600,
         "h": 100,
         "w": 100,
         "color": false
@@ -49,10 +49,10 @@
       "mass": 1,
       "static": true,
       "body": {
-        "x": 0,
-        "y": 0,
-        "w": 0,
-        "h": 0
+        "x": 600,
+        "y": 600,
+        "w": 100,
+        "h": 100
       }
     }
   }
