@@ -5,18 +5,18 @@ debug_mode = 5
 
 debug_reactive = "Args: %A Id: %I Function_name: %F\n"
 
-log = True
+log = False
 
 console_log = False
 
 if len(sys.argv) > 1:
 
 	if sys.argv[1].lower() == "true":
-		console_log = True
+		log = True
 
-		if len(sys.argv) > 2:
-			debug_mode = 2
-			debug_reactive = sys.argv[2]
+	if len(sys.argv) > 2:
+		debug_mode = 2
+		debug_reactive = sys.argv[2]
 
 keys_map = [
 		["scroll", 4, "zoom_in"],
@@ -29,13 +29,14 @@ keys_map = [
 		["k_hold", "k_w", "object_move_forward"],
 		["k_hold", "k_a", "object_move_left"],
 		["k_hold", "k_s", "object_move_back"],
-		["k_hold", "k_r", "reload_lvl"]
+		["k_hold", "k_r", "reload_lvl"],
+		["click", "", "spawn_new_rect"]
 		]
 
-Simulation = main.Simulation(log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, fps=120, keys_map=keys_map, output_console=console_log)
+Simulation = main.Simulation(log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, fps=400, keys_map=keys_map, output_console=console_log, output_file=False, debug_interval_time=10)
 
 Simulation.setup()
 
-Simulation.load_lvl(1)
+Simulation.load_lvl(5)
 
 Simulation.start()

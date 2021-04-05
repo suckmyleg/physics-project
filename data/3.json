@@ -1,0 +1,171 @@
+{"level_name":"testing",
+"objects":[
+  {
+    "visual": {
+      "layer": 1,
+      "color": [
+        150,
+        1,
+        1
+      ],
+      "visible": true,
+      "body": {
+        "x": 250,
+        "y": 600,
+        "h": 5,
+        "w": 5,
+        "color": false
+      }
+    },
+    "collider": {
+      "mass": 1,
+      "static": false,
+      "body": {
+        "x": 250,
+        "y": 600,
+        "w": 5,
+        "h": 5
+      }
+    }
+  },
+  {
+    "visual": {
+      "layer": 1,
+      "color": [
+        150,
+        1,
+        1
+      ],
+      "visible": true,
+      "body": {
+        "x": 600,
+        "y": 600,
+        "h": 5,
+        "w": 5,
+        "color": false
+      }
+    },
+    "collider": {
+      "mass": 1,
+      "static": false,
+      "body": {
+        "x": 600,
+        "y": 600,
+        "w": 5,
+        "h": 5
+      }
+    }
+  },
+  {
+    "visual": {
+      "layer": 1,
+      "color": [
+        150,
+        1,
+        1
+      ],
+      "visible": true,
+      "body": {
+        "x": 610,
+        "y": 600,
+        "h": 5,
+        "w": 5,
+        "color": false
+      }
+    },
+    "collider": {
+      "mass": 100000000000,
+      "static": false,
+      "body": {
+        "x": 610,
+        "y": 600,
+        "w": 5,
+        "h": 5
+      }
+    }
+  },
+  {
+    "visual": {
+      "layer": 1,
+      "color": [
+        150,
+        1,
+        1
+      ],
+      "visible": true,
+      "body": {
+        "x": 650,
+        "y": 610,
+        "h": 5,
+        "w": 5,
+        "color": false
+      }
+    },
+    "collider": {
+      "mass": 1,
+      "static": false,
+      "body": {
+        "x": 650,
+        "y": 610,
+        "w": 5,
+        "h": 5
+      }
+    }
+  },
+  {
+    "visual": {
+      "layer": 1,
+      "color": [
+        150,
+        1,
+        1
+      ],
+      "visible": true,
+      "body": {
+        "x": 690,
+        "y": 610,
+        "h": 5,
+        "w": 5,
+        "color": false
+      }
+    },
+    "collider": {
+      "mass": 1,
+      "static": false,
+      "body": {
+        "x": 690,
+        "y": 610,
+        "w": 5,
+        "h": 5
+      }
+    }
+  },
+  {
+    "visual": {
+      "layer": 1,
+      "color": [
+        150,
+        1,
+        1
+      ],
+      "visible": true,
+      "body": {
+        "x": 670,
+        "y": 610,
+        "h": 5,
+        "w": 5,
+        "color": false
+      }
+    },
+    "collider": {
+      "mass": 1,
+      "static": false,
+      "body": {
+        "x": 670,
+        "y": 610,
+        "w": 5,
+        "h": 5
+      }
+    }
+  }
+]}

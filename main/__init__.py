@@ -8,7 +8,7 @@ from json import loads
 
 class Simulation:
 	def main(self):
-		for i in range(10000):
+		for i in range(100000000):
 			self.reload()
 			self.debug("main", sep="Reload")
 
@@ -45,9 +45,9 @@ class Simulation:
 		self.debug("get_fps")
 		return self.visuals.fps
 
-	def __init__(self, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", debug_interval_time=5, fps=60, keys_map=False, output_console=True):
+	def __init__(self, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", debug_interval_time=5, fps=60, keys_map=False, output_console=True, output_file=False):
 
-		self.Debug = Debug(log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, interval_time=debug_interval_time, output_console=output_console, output_file=True)
+		self.Debug = Debug(log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, interval_time=debug_interval_time, output_console=output_console, output_file=output_file)
 
 		self.debug = self.Debug.get_debug("Simulation", debug_mode)
 

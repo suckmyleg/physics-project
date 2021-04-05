@@ -26,15 +26,22 @@ class VISUALS:
 		pygame.draw.line(self.screen, color, l["A"], l["B"])
 
 
-	def draw_actual_speed(self, x, y, x0, y0, ix, iy):
+	def draw_actual_speed(self, x, y, x0, y0, ix, iy, m, w, h):
 		self.debug("draw_actual_speed")
 		color = (0, 250, 0)
 
-		labelx = self.myFont.render("x: " + str(x), True, (0,128,255))
-		self.screen.blit(labelx, (ix, -2*self.font_size + iy - 0.5))
+		default = - 0.5
 
-		labely = self.myFont.render("y: " + str(y), True, (0,128,255))
-		self.screen.blit(labely, (ix, -1*self.font_size + iy - 0.5))
+		labelx = self.myFont.render("sx: {}*10^(-2) m/s".format(int(x*100)), True, (0,128,255))
+		self.screen.blit(labelx, (ix, -3*self.font_size + iy + default))
+
+		labely = self.myFont.render("sy: {}*10^(-2) m/s".format(int(y*100)), True, (0,128,255))
+		self.screen.blit(labely, (ix, -2*self.font_size + iy + default))
+
+		labeln = self.myFont.render("masa: {}kg".format(int(m*10)), True, (0,128,255))
+		self.screen.blit(labeln, (ix, -1*self.font_size + iy + default))
+
+
 
 		pygame.draw.line(self.screen, color, [x0, y0], [x0+x*10, y0])
 		pygame.draw.line(self.screen, color, [x0, y0], [x0, y0+y*10])
@@ -48,7 +55,7 @@ class VISUALS:
 			
 			self.draw_rect(visual["body"], color)
 
-			self.draw_actual_speed(o["collider"]["movement"]["x"], o["collider"]["movement"]["y"], o["collider"]["body"]["vectors"][4][0], o["collider"]["body"]["vectors"][4][1], o["collider"]["body"]["x"], o["collider"]["body"]["y"])
+			self.draw_actual_speed(o["collider"]["movement"]["x"], o["collider"]["movement"]["y"], o["collider"]["body"]["vectors"][4][0], o["collider"]["body"]["vectors"][4][1], o["collider"]["body"]["x"], o["collider"]["body"]["y"], o["collider"]["mass"], o["collider"]["body"]["w"], o["collider"]["body"]["h"])
 
 	def get_highest_layer(self, objects):
 		self.debug("get_highest_layer", args=len(objects))
@@ -117,9 +124,12 @@ class VISUALS:
 			del messages[0]
 		self.show_messages_folder("Calls", messages)
 
+	def get_mouse_pos(self):
+		return pygame.mouse.get_pos()
+
 	def mouse_info(self):
 		self.debug("mouse_info")
-		x,y = pygame.mouse.get_pos()
+		x, y = self.get_mouse_pos()
 		messages = ["mouse coords: {}, {}".format(str(x), str(y))]
 		self.show_messages_folder("Input", messages)
 
@@ -156,8 +166,18 @@ class VISUALS:
 		self.debug("get_actions")
 		return pygame.event.get()
 
+	def remove_out(self, objects):
+		
+		for o in objects:
+			if o["collider"]["body"]["x"] > self.width or o["collider"]["body"]["x"] < 0:
+				del objects[objects.index(o)]
+			else:
+				if o["collider"]["body"]["y"] > self.height or o["collider"]["body"]["y"] < 0:
+					del objects[objects.index(o)]
+
 	def draw_objects(self, phisics_objects):
 		try:
+			self.remove_out(phisics_objects)
 			objects = copy.deepcopy(phisics_objects)
 			self.debug("draw_objects")
 
@@ -178,7 +198,7 @@ class VISUALS:
 		self.font_size = font_size
 		self.myFont = pygame.font.SysFont('monospace', self.font_size, True, False)
 
-	def __init__(self, width=1920, height=1080, debug=False, debug_mode=5, fps=60, show_debug=False):
+	def __init__(self, width=1080, height=720, debug=False, debug_mode=5, fps=60, show_debug=False):
 		self.show_debug = show_debug
 		self.debug_c = debug
 		self.debug = self.debug_c.get_debug("VISUALS", debug_mode)

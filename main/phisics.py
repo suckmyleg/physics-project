@@ -81,9 +81,33 @@ class PHISICS:
 	def move_collider_rect(self, rect, x, y):
 		self.debug("move_collider_rect")
 		if self.collider_phisics:
-			n = self.get_nearest_distance(rect)
-			if n < x:
-				x = n
+			n, nearest_object, angle = self.get_nearest_distance(rect)
+			rect["collider"]["object_nearest"] = n
+
+			xx, yy = self.fx_fy(n, angle)
+
+			if x > 0:
+				if n < x:
+					x = n
+
+			if y > 0:
+				if n < y:
+					y = n
+			if n < x or n < y:
+				xm = (rect["collider"]["movement"]["x"] + nearest_object["collider"]["movement"]["x"])/2
+				ym = (rect["collider"]["movement"]["y"] + nearest_object["collider"]["movement"]["y"])/2
+
+				rect["collider"]["movement"]["x"] = xm
+				rect["collider"]["movement"]["y"] = ym
+				nearest_object["collider"]["movement"]["x"] = xm
+				nearest_object["collider"]["movement"]["y"] = ym
+
+				self.move_collider_rect_without_passion(nearest_object, xm, ym)
+
+			return self.move_collider_rect_without_passion(rect, x, y)
+
+	def move_collider_rect_without_passion(self, rect, x, y):
+		self.debug("move_collider_rect")
 
 		rect["collider"]["body"]["x"] += x
 		rect["collider"]["body"]["y"] += y
@@ -113,16 +137,27 @@ class PHISICS:
 		self.debug("get_angle_from_x_y")
 
 		if x == 0:
-			return 0
+			if y >= 0:
+				return 180
+			else:
+				return 0
 
-		angle = 0
+		if x < 0:
+			if y > 0:
+				angle = 90
+			else:
+				angle = 0
 
-		if x < 0 or y < 0:
-			angle += 0
+		else:
+			if y > 0:
+				angle = 90
+			else:
+				angle = 180
 
-		angle += math.atan(y/x)
+		angle += abs(math.atan(y/x))
 
-		print(angle, y, x)
+		#print("x:{} y:{} angle:{}".format(x, y, angle))
+
 		return angle
 
 
@@ -133,57 +168,65 @@ class PHISICS:
 				fx, fy = self.get_act_x_y(objectt, o)
 				self.push_rect(o, fx, fy)
 
-	def get_gravity_intensity(self, r, m):
+	def get_gravity_intensity(self, r, m, M):
 		self.debug("get_gravity_intensity")
-		return (-self.constants["G"]*(m/(r**2)))
+		if r > 0:
+			return (-self.constants["G"]*(m/(r**2))*M)
+		else:
+			return 0
 
 	def get_act_x_y(self, obj1, obj2):
 		self.debug("act_to_objects")
 		x, y, h = self.distance_beetween_rects_centers(obj1, obj2)
 
-		i = self.get_gravity_intensity(h, obj1["collider"]["mass"])
-
+		i = self.get_gravity_intensity(h, obj1["collider"]["mass"], obj2["collider"]["mass"])
 
 		if not x == 0 and not y == 0:
 
 			angle = self.get_angle_from_x_y(x, y)
-			
+
+
 			fx, fy = self.fx_fy(i, angle)
 			
-			#print(x, y, h, i, angle, fx, fy)
 		else:
+			print("auto", x, y, h)
 			if x == 0:
 				fx = 0
-				fy = i
+				fy = -i
 			else:
 				if y == 0:
-					fx = i
+					fx = -i
 					fy = 0
 
-		return fx, fy
+		#print(fx, fy)
+
+		return -fx, -fy
 
 
 
 	def get_nearest_distance(self, rect):
 		near = False
+		n_o = False
+		angle = False
 		for o in self.objects:
-			n = self.distance_beetween_rects(rect, o)
-			if not near:
-				near = n
-			else:
-				if near > n:
+			if not rect == o:
+				n, ang = self.distance_beetween_rects(rect, o)
+				if not near:
 					near = n
+					n_o = o
+					angle = ang
+				else:
+					if near > n:
+						near = n
+						n_o = o
+						angle = ang
 		self.debug("get_nearest_distance", args=[near])
-		return abs(near)
-
-	def distance_beetween_rects(self, obj1, obj2):
-		self.debug("distance_beetween_rects")
-		return self.distance_beetween_rects(obj1["collider"]["body"], obj2["collider"]["body"])
+		return abs(near), n_o, angle
 
 	def distance_beetween_rects_centers(self, obj1, obj2):
 		self.debug("distance_beetween_rects_centers")
-		x = obj1["collider"]["body"]["vectors"][4][0] - obj2["collider"]["body"]["vectors"][4][0]
-		y = obj1["collider"]["body"]["vectors"][4][1] - obj2["collider"]["body"]["vectors"][4][1]
+		x = obj2["collider"]["body"]["vectors"][4][0] - obj1["collider"]["body"]["vectors"][4][0]
+		y = obj2["collider"]["body"]["vectors"][4][1] - obj1["collider"]["body"]["vectors"][4][1]
 
 		if y == 0:
 			return x, y, x
@@ -191,12 +234,57 @@ class PHISICS:
 			if x == 0:
 				return x, y, y
 
-		return x, y, math.sqrt(((x)**2)+ ((y)**2))
+		return x, y, self.get_hipo(x, y)
 
+	def get_hipo(self, x, y):
+		self.debug("get_hipo")
+		return math.sqrt(((x)**2)+ ((y)**2))
+
+	def beetween(self, n1, n2, v):
+		self.debug("move_collider_rect")
+		if n1 < v < n2:
+			return True
+		else:
+			return False
+
+	def get_hipo_inside_rect(self, rect1, rect2, x, y):
+
+		self.debug("move_collider_rect")
+		if x == 0:
+			return y - (rect1["collider"]["body"]["h"]/2) - (rect2["collider"]["body"]["h"]/2)
+		else:
+			if y == 0:
+				return x - (rect1["collider"]["body"]["w"]/2) - (rect2["collider"]["body"]["w"]/2)  
+ 	
+		angle = self.get_angle_from_x_y(x, y)
+
+		if self.beetween(360-rect1["collider"]["body"]["vectors_angles"][2], 360, angle) or self.beetween(0, rect1["collider"]["body"]["vectors_angles"][3], angle) or self.beetween(rect1["collider"]["body"]["vectors_angles"][1], rect1["collider"]["body"]["vectors_angles"][0], angle):
+			c = rect1["collider"]["body"]["h"]
+		else:
+			c = rect1["collider"]["body"]["w"]
+
+		angle = angle%90
+
+		if angle == 0:
+			return 0
+
+		return c/(math.sin(angle))
 
 	def distance_beetween_rects(self, rect1, rect2):
 		self.debug("distance_beetween_rects")
-		return min(rect1["collider"]["body"]['x']+rect1["collider"]["body"]['w']-rect2["collider"]["body"]['x'], rect2["collider"]["body"]['x']+rect2["collider"]["body"]['w']-rect1["collider"]["body"]['x'])
+		x = rect2["collider"]["body"]["vectors"][4][0] - rect1["collider"]["body"]["vectors"][4][0]
+		y = rect2["collider"]["body"]["vectors"][4][1] - rect1["collider"]["body"]["vectors"][4][1]
+		total = self.get_hipo(x, y)
+
+		#l1 = self.get_hipo_inside_rect(rect1, rect2, x, y)
+		#l2 = self.get_hipo_inside_rect(rect2, rect1, x, y)
+
+		h = total
+
+		return abs(h - rect1["collider"]["body"]["w"]), self.get_angle_from_x_y(x, y)
+
+
+		
 
 
 	def find_point_in_area(self, x1, y1, x2, y2, x, y):
@@ -248,16 +336,29 @@ class PHISICS:
 			[body["x"], body["y"]],
 			[body["x"] + body["w"], body["y"]],
 			[body["x"], body["y"] + body["h"]],
-			[body["x"] + body["w"], body["y"] + body["h"]],
-			[body["x"] + (body["w"]/2), body["y"] + (body["h"]/2)]
+			[body["x"] + body["w"], body["y"] + body["h"]]
 		]
+		center = [body["x"] + (body["w"]/2), body["y"] + (body["h"]/2)]
+
+		body["vectors_angles"] = []
+
+		for v in body["vectors"]:
+			body["vectors_angles"].append(self.get_angle_from_x_y(v[0]-center[0], v[1]-center[1]))
+
+		body["vectors"].append(center)
+
 		return body
 
 	def setup_collider(self, collider):
 		self.debug("setup_collider")
 		collider["body"] = self.setup_rect_body(collider["body"])
-		collider["mass"] = 10000000000000000
-		collider["movement"] = {"x":0, "y":0}
+		try:
+			mov = collider["movement"]
+		except:
+			collider["movement"] = {"x":0, "y":0}
+		else:
+			if not mov:
+				collider["movement"] = {"x":0, "y":0}
 		return collider
  
 	def create_object(self, json_object):
@@ -283,6 +384,6 @@ class PHISICS:
 
 		self.constants = {"G":6.67*10**(-11)}
 
-		self.collider_phisics = False
+		self.collider_phisics = True
 
 		self.objects = []
