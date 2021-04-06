@@ -182,8 +182,8 @@ class CONTROLLS:
 
 
 
-	def __init__(self, keys_map, pygame, debug, debug_mode, main):
-		self.debug = debug.get_debug("CONTROLLS", debug_mode)
+	def __init__(self, keys_map, pygame, debug, main):
+		self.debug = debug.get_debug("CONTROLLS")
 		self.debug("__init__")
 
 		self.pygame = pygame

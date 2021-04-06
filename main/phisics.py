@@ -379,12 +379,14 @@ class PHISICS:
 			i += 1
 			if fun_info:
 				fun_info("Adding object n: {}/{}".format(i, len(objects)))
+				
 			self.add_object(self.create_object(o))
+
 			if fun:
 				fun()
 
-	def __init__(self, debug, debug_mode, get_fps):
-		self.debug = debug.get_debug("PHISICS", debug_mode)
+	def __init__(self, debug, get_fps):
+		self.debug = debug.get_debug("PHISICS")
 		self.debug("__init__")
 
 		self.get_fps = get_fps

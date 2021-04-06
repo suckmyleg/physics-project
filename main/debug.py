@@ -173,7 +173,9 @@ class Debug:
 
 				self.modes[mode](main, function_name, args, error=error, debug_reactive=debug_reactive)
 
-	def get_debug(self, main, mode, reactive=""):
+	def get_debug(self, main, mode=False, reactive=""):
+		if not mode:
+			mode = self.debug_mode
 		d = Minidebug(main, mode, reactive, self.debug)
 		return d.debug
 

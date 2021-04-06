@@ -5,9 +5,9 @@ debug_mode = 5
 
 debug_reactive = "Args: %A Id: %I Function_name: %F\n"
 
-log = False
+log = True
 
-console_log = False
+console_log = True
 
 if len(sys.argv) > 1:
 
