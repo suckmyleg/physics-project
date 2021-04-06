@@ -9,8 +9,9 @@ class PHISICS:
 
 	def reload(self):
 		self.debug("reload")
-		for o in self.objects:
-			self.act_react(o)
+		if not self.pause:
+			for o in self.objects:
+				self.act_react(o)
 
 	def act_react(self, o):
 		self.debug("act_react")
@@ -172,7 +173,7 @@ class PHISICS:
 	def get_gravity_intensity(self, r, m, M):
 		self.debug("get_gravity_intensity")
 		if r > 0:
-			return (-self.constants["G"]*(m/(r**2))*M)
+			return (-self.constants["G"]*(m/((r*self.distance_scale)**2))*M)
 		else:
 			return 0
 
@@ -387,6 +388,10 @@ class PHISICS:
 		self.debug("__init__")
 
 		self.get_fps = get_fps
+
+		self.distance_scale = 1/1000
+
+		self.pause = False
 
 		self.constants = {"G":6.67*10**(-11)}
 

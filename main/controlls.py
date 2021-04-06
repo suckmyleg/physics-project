@@ -28,7 +28,9 @@ class CONTROLLS:
 		self.debug("switch_pause")
 		if self.pause:
 			self.pause = False
+			self.phisics.pause = False
 		else:
+			self.phisics.pause = True
 			self.pause = True
 
 	def reload_lvl(self):
@@ -61,7 +63,7 @@ class CONTROLLS:
 			self.debug("object_move_right")
 			self.phisics.push_rect(self.phisics.objects[object_id], 1, 0)
 
-	def spawn_new_rect(self, x, y, mass, color=[150,1,250]):
+	def spawn_new_rect(self, x, y, mass=100000000000, color=[150,1,250]):
 		rect = {
     "visual": {
       "layer": 1,
@@ -140,7 +142,7 @@ class CONTROLLS:
 				return t
 
 	def get_value_from_event(self, e, event_type):
-		if event_type == "scroll":
+		if event_type == "scroll" or event_type == "click":
 			return e.button
 		else:
 			if event_type in ["k_down", "k_up"]:
@@ -153,18 +155,6 @@ class CONTROLLS:
 		for e in events:
 			event_type = self.get_type_of_event(e)
 			value = self.get_value_from_event(e, event_type)
-
-			#print("\n", event_type, value)
-
-			if e.type == self.pygame.MOUSEBUTTONUP:
-				if e.button == 1:
-					self.change_lvl()
-					"""
-					x, y = self.visuals.get_mouse_pos()
-					self.spawn_new_rect(x, y, 100000)
-				else:
-					x, y = self.visuals.get_mouse_pos()
-					self.spawn_new_rect(x, y, 100000000, [150,250,250])"""
 
 			if value:
 				try:
@@ -206,7 +196,7 @@ class CONTROLLS:
 
 		self.keys_map = keys_map
 		
-		self.types = {"scroll":[pygame.MOUSEBUTTONDOWN], "k_down":[pygame.KEYDOWN], "k_up":[pygame.KEYUP], "k_hold":[pygame.KEYDOWN, pygame.KEYUP, "k_hold"], "click":[pygame.MOUSEBUTTONDOWN]}
+		self.types = {"scroll":[pygame.MOUSEBUTTONDOWN], "k_down":[pygame.KEYDOWN], "k_up":[pygame.KEYUP], "k_hold":[pygame.KEYDOWN, pygame.KEYUP, "k_hold"], "click":[pygame.MOUSEBUTTONDOWN, "click"]}
 
 		self.keys = {"k_down":pygame.K_DOWN, "k_up":pygame.K_UP, "k_space":pygame.K_SPACE, "k_rshift":pygame.K_RSHIFT, "k_escape":pygame.K_ESCAPE, "k_a":pygame.K_a, "k_s":pygame.K_s, "k_d":pygame.K_d, "k_w":pygame.K_w, "k_r":pygame.K_r}
 
