@@ -26,15 +26,35 @@ class Simulation:
 		self.debug("reload_lvl")
 		self.load_lvl(self.actual_lvl)
 
+	def get_progress(self):
+		self.debug("get_progress")
+		if self.loaded == 0:
+			return 0
+		return (self.loaded * 100)/self.to_load
+
+	def check_loading(self):
+		self.debug("check_loading")
+		return self.loading
+
+	def add_loaded(self):
+		self.debug("add_loaded")
+		self.loaded += 1
+
 	def load_lvl(self, lvl):
 		self.debug("load_lvl", args=[lvl])
 		self.phisics.objects = []
 		self.actual_lvl = lvl
 		data = loads(open("data/{}.json".format(lvl), "r").read())
+		self.to_load = len(data["objects"])
+		self.loaded = 0
+		self.loading = True
+		change_message = self.visuals.start_loading_screen(self.check_loading, self.get_progress)
 		try:
-			self.phisics.add_objects(data["objects"])
+			self.phisics.add_objects(data["objects"], fun=self.add_loaded, fun_info=change_message)
 		except Exception as p:
 			self.debug("load_lvl", error=p)
+
+		self.loading = False
 
 	def start(self):
 		self.debug("start")
@@ -59,6 +79,12 @@ class Simulation:
 		self.visuals = VISUALS(debug=self.Debug, debug_mode=debug_mode, fps=fps)
 
 		self.controlls = CONTROLLS(keys_map, pygame, self.Debug, debug_mode, self)
+
+		self.to_load = 0
+
+		self.loaded = 0
+
+		self.loading = False
 
 		self.debug_mode = debug_mode
 

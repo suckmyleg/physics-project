@@ -5,7 +5,7 @@ debug_mode = 5
 
 debug_reactive = "Args: %A Id: %I Function_name: %F\n"
 
-log = False
+log = True
 
 console_log = False
 
@@ -33,10 +33,10 @@ keys_map = [
 		["click", "", "spawn_new_rect"]
 		]
 
-Simulation = main.Simulation(log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, fps=400, keys_map=keys_map, output_console=console_log, output_file=False, debug_interval_time=10)
+Simulation = main.Simulation(log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, fps=120, keys_map=keys_map, output_console=console_log, output_file=True, debug_interval_time=10)
 
 Simulation.setup()
 
-Simulation.load_lvl(5)
+Simulation.load_lvl(4)
 
 Simulation.start()

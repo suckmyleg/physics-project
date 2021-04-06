@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import copy
+from time import sleep
 
 class PHISICS:
 	def main(self):
@@ -16,14 +17,14 @@ class PHISICS:
 		self.act_to_object(o)
 		self.react_to_movement(o)
 
-	def load_objects(self, objects):
+	def load_objects(self, objects, fun=False, fun_info=False):
 		self.debug("load_objects")
 		self.objects = []
-		self.setup_objects(objects)
+		self.setup_objects(objects, fun=fun, fun_info=fun_info)
 
-	def add_objects(self, objects):
+	def add_objects(self, objects, fun=False, fun_info=False):
 		self.debug("add_objects")
-		self.setup_objects(objects)
+		self.setup_objects(objects, fun=fun, fun_info=fun_info)
 
 	def add_object(self, o):
 		self.debug("add_object", args=[o])
@@ -189,7 +190,6 @@ class PHISICS:
 			fx, fy = self.fx_fy(i, angle)
 			
 		else:
-			print("auto", x, y, h)
 			if x == 0:
 				fx = 0
 				fy = -i
@@ -370,11 +370,17 @@ class PHISICS:
 
 		return json_object
 
-	def setup_objects(self, objectss):
+	def setup_objects(self, objectss, fun=False, fun_info=False):
 		self.debug("setup_objects", args=[objectss])
 		objects = copy.deepcopy(objectss)
+		i = 0
 		for o in objects:
+			i += 1
+			if fun_info:
+				fun_info("Adding object n: {}/{}".format(i, len(objects)))
 			self.add_object(self.create_object(o))
+			if fun:
+				fun()
 
 	def __init__(self, debug, debug_mode, get_fps):
 		self.debug = debug.get_debug("PHISICS", debug_mode)

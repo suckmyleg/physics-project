@@ -3,6 +3,7 @@ environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import copy
 import pygame
 from time import sleep
+from threading import Thread
 
 class VISUALS:
 	def draw_rect(self, l, color):
@@ -89,9 +90,9 @@ class VISUALS:
 		self.screen.blit(label, (10, self.message_n*self.font_size + self.font_default_height))
 		self.message_n += 1
 
-	def info(self):
+	def info(self, show=False):
 		self.debug("info")
-		if self.show_debug:
+		if self.show_debug or show:
 			self.mouse_info()
 			self.screen_info()
 			self.debug_info()
@@ -147,9 +148,9 @@ class VISUALS:
 		self.message_n = 0.1
 		pygame.display.flip()
 
-	def clear_screen(self):
+	def clear_screen(self, color=(0,0,0)):
 		self.debug("clear_screen")
-		self.screen.fill((0,0,0))
+		self.screen.fill(color)
 
 	def reload(self, objects=False):
 		self.debug("reload")
@@ -197,6 +198,96 @@ class VISUALS:
 				font_size = 33
 		self.font_size = font_size
 		self.myFont = pygame.font.SysFont('monospace', self.font_size, True, False)
+
+
+
+
+
+
+
+
+
+	def display_loading_bar_message(self, t, x, y):
+		self.debug("display_loading_bar_message")
+
+		title = self.myFont.render(str(t), True, (255,0,0))
+		self.screen.blit(title, (x - len(t), y-self.font_size*2))
+
+	def display_progress(self, progress, t, xs=0, ys=0):
+		self.debug("display_progress")
+
+		width = 1000
+
+		color_progress = (0, 255, int(160*(progress/100)))
+
+		width_progress = width*(progress/100)
+
+		x = xs + self.width - 20 - width
+
+		height = 20
+
+		y = ys + self.height - 10 - height
+
+		middle_bar_x = x+(width_progress/2)
+
+		middle_bar_y = y+(height/2)
+
+		progress_message = str(int(progress))+"%"
+
+		self.display_loading_bar_message(t, x+5, y)
+
+		pygame.draw.rect(self.screen, (0,0,0), pygame.Rect(x, y, width, height))
+		pygame.draw.rect(self.screen, color_progress, pygame.Rect(x ,y, width_progress, height))
+
+		label = self.myFont.render(progress_message, True, (255,0,0))
+		self.screen.blit(label, (middle_bar_x - len(progress_message), middle_bar_y-self.font_size/2))
+
+	def display_message(self, message, color=(0,128,255)):
+		self.debug("display_message")
+
+		label = self.myFont.render(str(message), True, color)
+		self.screen.blit(label, ((self.width-len(message))/2, 200))
+
+
+	def reload_loading_screen(self, progress, message):
+		self.debug("reload_loading_screen")
+		actions = self.get_actions()
+		self.clear_screen(color=(0, 0, 100))
+		self.display_message(message)
+		if progress or progress == 0:
+			self.display_progress(progress, self.loading_message)
+		self.screen_info()
+		self.update_screen()
+		return actions
+
+	def change_loading_message(self, message):
+		self.loading_message = str(message)
+
+	def loading_screen(self, loading_fun, progress_fun, title):
+		self.debug("loading_screen")
+		print("Loading")
+		self.loading_message = ""
+		progress = False
+		while loading_fun():
+
+			if progress_fun:
+				progress = progress_fun()
+
+			self.reload_loading_screen(progress, title)
+
+		if progress_fun:
+			progress = progress_fun()
+
+		self.reload_loading_screen(progress, "Done!")
+
+		print("Loaded")
+
+	def start_loading_screen(self, loading_fun, progress_fun=False, title="Loading"):
+		self.debug("loading_screen")
+		t = Thread(target=self.loading_screen, args=(loading_fun, progress_fun, title))
+		t.start()
+		return self.change_loading_message
+
 
 	def __init__(self, width=1080, height=720, debug=False, debug_mode=5, fps=60, show_debug=False):
 		self.show_debug = show_debug

@@ -35,6 +35,9 @@ class CONTROLLS:
 		self.debug("reload_lvl")
 		self.main.reload_lvl()
 
+	def change_lvl(self):
+		self.main.load_lvl(6)
+
 
 	#PLAYER CONTROLLS
 
@@ -155,11 +158,13 @@ class CONTROLLS:
 
 			if e.type == self.pygame.MOUSEBUTTONUP:
 				if e.button == 1:
+					self.change_lvl()
+					"""
 					x, y = self.visuals.get_mouse_pos()
 					self.spawn_new_rect(x, y, 100000)
 				else:
 					x, y = self.visuals.get_mouse_pos()
-					self.spawn_new_rect(x, y, 100000000, [150,250,250])
+					self.spawn_new_rect(x, y, 100000000, [150,250,250])"""
 
 			if value:
 				try:
@@ -167,7 +172,6 @@ class CONTROLLS:
 				except:
 					pass
 				else:
-					print(data["type"])
 					if "k_hold" in data["type"]:
 						if event_type == "k_down":
 							self.active_command(data["function"])
