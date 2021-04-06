@@ -5,9 +5,9 @@ debug_mode = 5
 
 debug_reactive = "Args: %A Id: %I Function_name: %F\n"
 
-log = True
+log = False
 
-console_log = True
+console_log = False
 
 if len(sys.argv) > 1:
 
@@ -30,7 +30,8 @@ keys_map = [
 		["k_hold", "k_a", "object_move_left"],
 		["k_hold", "k_s", "object_move_back"],
 		["k_hold", "k_r", "reload_lvl"],
-		["click", 1, "spawn_new_rect"]
+		["click", 1, "spawn_new_rect"],
+		["k_hold", "k_f", "change_lvl"]
 		]
 
 Simulation = main.Simulation(log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, fps=60, keys_map=keys_map, output_console=console_log, output_file=True, debug_interval_time=10)

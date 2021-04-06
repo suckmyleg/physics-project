@@ -198,9 +198,9 @@ class CONTROLLS:
 		
 		self.types = {"scroll":[pygame.MOUSEBUTTONDOWN], "k_down":[pygame.KEYDOWN], "k_up":[pygame.KEYUP], "k_hold":[pygame.KEYDOWN, pygame.KEYUP, "k_hold"], "click":[pygame.MOUSEBUTTONDOWN, "click"]}
 
-		self.keys = {"k_down":pygame.K_DOWN, "k_up":pygame.K_UP, "k_space":pygame.K_SPACE, "k_rshift":pygame.K_RSHIFT, "k_escape":pygame.K_ESCAPE, "k_a":pygame.K_a, "k_s":pygame.K_s, "k_d":pygame.K_d, "k_w":pygame.K_w, "k_r":pygame.K_r}
+		self.keys = {"k_f":pygame.K_f, "k_down":pygame.K_DOWN, "k_up":pygame.K_UP, "k_space":pygame.K_SPACE, "k_rshift":pygame.K_RSHIFT, "k_escape":pygame.K_ESCAPE, "k_a":pygame.K_a, "k_s":pygame.K_s, "k_d":pygame.K_d, "k_w":pygame.K_w, "k_r":pygame.K_r}
 
-		self.commands = {"spawn_new_rect":self.spawn_new_rect, "reload_lvl":self.reload_lvl, "object_move_forward":self.object_move_forward, "object_move_back":self.object_move_back, "object_move_left":self.object_move_left, "object_move_right":self.object_move_right, "switch_pause":self.switch_pause, "zoom_in":self.debug_zoom_in, "zoom_out":self.debug_zoom_out, "debug_down":self.debug_down, "debug_up":self.debug_up, "switch_debug":self.switch_debug}
+		self.commands = {"change_lvl":self.change_lvl, "spawn_new_rect":self.spawn_new_rect, "reload_lvl":self.reload_lvl, "object_move_forward":self.object_move_forward, "object_move_back":self.object_move_back, "object_move_left":self.object_move_left, "object_move_right":self.object_move_right, "switch_pause":self.switch_pause, "zoom_in":self.debug_zoom_in, "zoom_out":self.debug_zoom_out, "debug_down":self.debug_down, "debug_up":self.debug_up, "switch_debug":self.switch_debug}
 		
 		self.active_commands = [] 
 

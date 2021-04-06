@@ -19,6 +19,7 @@ class Loading_screen:
 		self.loading = True
 		self.total = to_load
 		self.current = 0
+		self.progress = 0
 		self.loading_screen_title = title
 
 		self.start_visual_menu()
@@ -27,18 +28,16 @@ class Loading_screen:
 
 	def reload_progress(self):
 		self.debug("reload_progress")
-		if self.loaded == 0:
+		if self.current == 0:
 			self.progress = 0
-		self.progress = (self.loaded * 100)/self.to_load
+		self.progress = (self.current * 100)/self.total
 
 		if self.progress == 100:
 			self.loading = False
 
-		print(self.progress)
-
 	def add_loaded(self):
 		self.debug("add_loaded")
-		self.loaded += 1
+		self.current += 1
 		self.reload_progress()
 
 	#VISUAL
@@ -47,25 +46,23 @@ class Loading_screen:
 		self.debug("display_loading_bar_message")
 
 		title = self.visuals.myFont.render(str(self.loading_message), True, (255,0,0))
-		self.visuals.screen.blit(title, (x - len(self.loading_message), y-self.visuals.font_size*2))
+		self.visuals.screen.blit(title, (x, y-self.visuals.font_size*2))
 
 	def display_progress(self, xs=0, ys=0):
 		self.debug("display_progress")
 
-		width = 1000
-
 		color_progress = (0, 255, int(160*(self.progress/100)))
 
+
+		width = self.visuals.width - 40
+		height = 20
+		
 		width_progress = width*(self.progress/100)
 
 		x = xs + self.visuals.width - 20 - width
-
-		height = 20
-
 		y = ys + self.visuals.height - 10 - height
 
 		middle_bar_x = x+(width_progress/2)
-
 		middle_bar_y = y+(height/2)
 
 		progress_message = str(int(self.progress))+"%"
@@ -75,7 +72,9 @@ class Loading_screen:
 		self.visuals.pygame.draw.rect(self.visuals.screen, (0,0,0), self.visuals.pygame.Rect(x, y, width, height))
 		self.visuals.pygame.draw.rect(self.visuals.screen, color_progress, self.visuals.pygame.Rect(x ,y, width_progress, height))
 
-		label = self.visuals.myFont.render(progress_message, True, (255,0,0))
+		label_color = (abs(200-color_progress[0]),abs(255-color_progress[1]),abs(250-color_progress[2]))
+
+		label = self.visuals.myFont.render(progress_message, True, label_color)
 		self.visuals.screen.blit(label, (middle_bar_x - len(progress_message), middle_bar_y-self.visuals.font_size/2))
 
 	def display_message(self, color=(0,128,255)):
