@@ -6,57 +6,49 @@ from time import sleep
 from threading import Thread
 
 class VISUALS:
-	def draw_rect(self, l, color):
+	def draw_rect(self, o):
 		self.debug("draw_rect")
-		if l["color"]:
-			color = color
 
-		if self.show_debug:
-			self.show_message("l: {}".format(l))
+			#self.show_message("x: {}   y: {}".format(o.x, o.y))
 
-		pygame.draw.rect(self.screen, color, pygame.Rect(l["x"], l["y"], l["h"], l["w"]))
+		pygame.draw.rect(self.screen, o.color, pygame.Rect(o.x, o.y, o.height, o.width))
 
-	def draw_line(self, l, color):
-		self.debug("draw_line")
-		if l["color"]:
-			color = color
-
-		if self.show_debug:
-			self.show_message("Ax: {} - Ay: {} - Bx: {} - By: {} {}".format(l["A"][0], l["A"][1], l["B"][0], l["B"][1], color))
-
-		pygame.draw.line(self.screen, color, l["A"], l["B"])
-
-
-	def draw_actual_speed(self, x, y, x0, y0, ix, iy, m, w, h):
+	def draw_actual_speed(self, o):
 		self.debug("draw_actual_speed")
 		color = (0, 250, 0)
 
 		default = - 0.5
 
-		labelx = self.myFont.render("sx: {}*10^(-2) m/s".format(int(x*100)), True, (0,128,255))
-		self.screen.blit(labelx, (ix, -3*self.font_size + iy + default))
+		if self.show_speed_labels:
 
-		labely = self.myFont.render("sy: {}*10^(-2) m/s".format(int(y*100)), True, (0,128,255))
-		self.screen.blit(labely, (ix, -2*self.font_size + iy + default))
+			labelx = self.myFont.render("sx: {}*10^(-2) m/s".format(int(o.speed.x*100)), True, (0,128,255))
+			self.screen.blit(labelx, (o.x, -3*self.font_size + o.y + default))
 
-		labeln = self.myFont.render("masa: {}kg".format(int(m*10)), True, (0,128,255))
-		self.screen.blit(labeln, (ix, -1*self.font_size + iy + default))
+			labely = self.myFont.render("sy: {}*10^(-2) m/s".format(int(o.speed.y*100)), True, (0,128,255))
+			self.screen.blit(labely, (o.x, -2*self.font_size + o.y + default))
+
+			labeln = self.myFont.render("masa: {}kg".format(int(o.mass*10)), True, (0,128,255))
+			self.screen.blit(labeln, (o.x, -1*self.font_size + o.y + default))
 
 
 
-		pygame.draw.line(self.screen, color, [x0, y0], [x0+x*10, y0])
-		pygame.draw.line(self.screen, color, [x0, y0], [x0, y0+y*10])
+		#pygame.draw.line(self.screen, color, o.center_vector, [o.center_vector[0] + o.speed.x*100, o.center_vector[1]])
+		#pygame.draw.line(self.screen, color, o.center_vector, [o.center_vector[0], o.center_vector[1]+o.speed.y*100])
+
+
+		if self.show_speed_gravity_direction:
+
+			for i in o.speed.interactions:
+			
+				pygame.draw.line(self.screen, color, o.center_vector, [o.center_vector[0] + i[0]*1000, o.center_vector[1] + i[1]*1000])
 
 	def draw_object(self, o):
 		self.debug("draw_object")
-		visual = o["visual"]
-
-		if visual["visible"]:
-			color = visual["color"]
 			
-			self.draw_rect(visual["body"], color)
+		self.draw_rect(o)
 
-			self.draw_actual_speed(o["collider"]["movement"]["x"], o["collider"]["movement"]["y"], o["collider"]["body"]["vectors"][4][0], o["collider"]["body"]["vectors"][4][1], o["collider"]["body"]["x"], o["collider"]["body"]["y"], o["collider"]["mass"], o["collider"]["body"]["w"], o["collider"]["body"]["h"])
+		if self.show_objects_speeds:
+			self.draw_actual_speed(o)
 
 	def get_highest_layer(self, objects):
 		self.debug("get_highest_layer", args=len(objects))
@@ -64,7 +56,7 @@ class VISUALS:
 		i = -1
 		for o in objects:
 			i += 1
-			if not highest or highest["visual"]["layer"] < o["visual"]["layer"]:
+			if not highest or highest.layer < o.layer:
 				highest = o
 		del objects[i]
 		return highest, objects
@@ -95,6 +87,7 @@ class VISUALS:
 		if self.show_debug or show:
 			self.mouse_info()
 			self.screen_info()
+			self.phisics_info()
 			self.debug_info()
 			self.debug_errors()
 
@@ -134,10 +127,18 @@ class VISUALS:
 		messages = ["mouse coords: {}, {}".format(str(x), str(y))]
 		self.show_messages_folder("Input", messages)
 
+	def phisics_info(self):
+		self.debug("screen_info")
+		messages = [
+		"scale: {}".format(self.phisics.distance_scale),
+		"n_objects: {}".format(len(self.phisics.objects))
+		]
+		self.show_messages_folder("Phisics", messages)
+
 	def screen_info(self):
 		self.debug("screen_info")
 		messages = ["resolution: {}x{}".format(self.width, self.height), 
-		"fps: {}".format(self.fps), 
+		"fps: {}".format(int(self.current_fps)), 
 		"debug_size: {}".format(self.font_size), 
 		"debug_mode: {}".format(self.debug_c.debug_mode)]
 		self.show_messages_folder("Screen", messages)
@@ -146,6 +147,8 @@ class VISUALS:
 	def update_screen(self):
 		self.debug("update_screen")
 		self.message_n = 0.1
+		self.clock.tick()
+		self.current_fps = self.clock.get_fps()
 		pygame.display.flip()
 
 	def clear_screen(self, color=(0,0,0)):
@@ -170,10 +173,10 @@ class VISUALS:
 	def remove_out(self, objects):
 		
 		for o in objects:
-			if o["collider"]["body"]["x"] > self.width or o["collider"]["body"]["x"] < 0:
+			if o.x > self.width or o.x < 0:
 				del objects[objects.index(o)]
 			else:
-				if o["collider"]["body"]["y"] > self.height or o["collider"]["body"]["y"] < 0:
+				if o.y > self.height or o.y < 0:
 					del objects[objects.index(o)]
 
 	def draw_objects(self, phisics_objects):
@@ -181,8 +184,6 @@ class VISUALS:
 			self.remove_out(phisics_objects)
 			objects = copy.deepcopy(phisics_objects)
 			self.debug("draw_objects")
-
-			self.show_message("")
 
 			for o in objects:#self.order_objects_by_layers(objects):
 				self.draw_object(o)
@@ -210,7 +211,8 @@ class VISUALS:
 
 
 
-	def __init__(self, width=1080, height=720, debug=False, fps=60, show_debug=False):
+	def __init__(self, phisics, width=1080, height=720, debug=False, fps=60, show_debug=False):
+		self.phisics = phisics
 		self.show_debug = show_debug
 		self.debug_c = debug
 		self.debug = self.debug_c.get_debug("VISUALS")
@@ -218,10 +220,15 @@ class VISUALS:
 		self.width = width
 		self.height = height
 		self.fps = fps
+		self.current_fps = fps
+		self.show_objects_speeds = False
+		self.show_speed_labels = True
+		self.show_speed_gravity_direction = True
 		self.fpsClock = pygame.time.Clock()
 		pygame.init()
 		self.screen = pygame.display.set_mode((self.width, self.height))
 		self.pygame = pygame
+		self.clock = self.pygame.time.Clock()
 		self.change_font_size(11)
 		self.font_default_height = 10
 		self.message_n = 0.1

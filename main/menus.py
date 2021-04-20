@@ -8,11 +8,29 @@ class Loading_screen:
 		self.visuals = visuals
 		self.loading = False
 
-		self.loading_message = ""
-		self.loading_screen_title = ""
+		self.loading_message = "Loading"
+		self.loading_screen_title = "Loading"
 		self.total = 0
 		self.current = 0
 		self.progress = 0
+
+		self.progress_border_size = 5
+		self.height_bar = 40
+
+
+	def load(self, fun, objects, title="Loading"):
+		t = Thread(target=self.start, args=(len(objects), title))
+		t.start()
+
+		try:
+
+			fun(objects, fun=self.add_loaded, fun_info=self.change_loading_message)
+
+		except Exception as e:
+			self.change_loading_message("Error loading\n{}".format(e))
+			self.debug("load", error=e)
+
+		self.loading = False
 
 	def start(self, to_load, title):
 		self.debug("start")
@@ -20,9 +38,10 @@ class Loading_screen:
 		self.total = to_load
 		self.current = 0
 		self.progress = 0
+		self.loading_message = "Loading"
 		self.loading_screen_title = title
 
-		self.start_visual_menu()
+		self.loading_screen()
 
 	#LOGIC
 
@@ -51,31 +70,33 @@ class Loading_screen:
 	def display_progress(self, xs=0, ys=0):
 		self.debug("display_progress")
 
-		color_progress = (0, 255, int(160*(self.progress/100)))
-
+		color_bar = (0, 255, int(160*(self.progress/100)))
 
 		width = self.visuals.width - 40
-		height = 20
 		
-		width_progress = width*(self.progress/100)
+		width_bar = width*(self.progress/100)
 
 		x = xs + self.visuals.width - 20 - width
-		y = ys + self.visuals.height - 10 - height
+		y = ys + self.visuals.height - 10 - self.height_bar
 
-		middle_bar_x = x+(width_progress/2)
-		middle_bar_y = y+(height/2)
+		middle_bar_x = x+(width_bar/2)
+		middle_bar_y = y+(self.height_bar/2)
 
 		progress_message = str(int(self.progress))+"%"
 
 		self.display_loading_bar_message(x+5, y)
 
-		self.visuals.pygame.draw.rect(self.visuals.screen, (0,0,0), self.visuals.pygame.Rect(x, y, width, height))
-		self.visuals.pygame.draw.rect(self.visuals.screen, color_progress, self.visuals.pygame.Rect(x ,y, width_progress, height))
+		self.visuals.pygame.draw.rect(self.visuals.screen, (0,0,0), self.visuals.pygame.Rect(x, y, width, self.height_bar))
 
-		label_color = (abs(200-color_progress[0]),abs(255-color_progress[1]),abs(250-color_progress[2]))
+		self.visuals.pygame.draw.rect(self.visuals.screen, color_bar, self.visuals.pygame.Rect(x+self.progress_border_size ,y+self.progress_border_size, width_bar-self.progress_border_size, self.height_bar-self.progress_border_size*2))
 
-		label = self.visuals.myFont.render(progress_message, True, label_color)
-		self.visuals.screen.blit(label, (middle_bar_x - len(progress_message), middle_bar_y-self.visuals.font_size/2))
+		label_color = (abs(200-color_bar[0]),abs(255-color_bar[1]),abs(250-color_bar[2]))
+
+		if len(progress_message)*12 < width_bar:
+
+			porcentage_label = self.visuals.myFont.render(progress_message, True, label_color)
+
+			self.visuals.screen.blit(porcentage_label, (middle_bar_x - len(progress_message), middle_bar_y-self.visuals.font_size/2))
 
 	def display_message(self, color=(0,128,255)):
 		self.debug("display_message")
@@ -99,20 +120,21 @@ class Loading_screen:
 		self.loading_message = str(message)
 
 	def loading_screen(self):
-		self.debug("loading_screen")
-		print("Loading")
-		while self.loading:
+		try:
+			while self.loading:
+				self.debug("loading_screen", sep="Loading {}".format(self.progress))
+
+				self.reload_loading_screen()
+
+			self.change_loading_message("Done!")
 
 			self.reload_loading_screen()
 
-		self.change_loading_message("Done!")
+		except Exception as e:
+			self.debug("loading_screen", error=e)
 
-		self.reload_loading_screen()
 
-	def start_visual_menu(self):
-		self.debug("start_visual_menu")
-		t = Thread(target=self.loading_screen)
-		t.start()
+		
 
 
 

@@ -86,14 +86,16 @@ class Debug:
 		if not exists:
 			self.errors.append(e)
 			print(e)
+			return True
 		else:
 			self.errors[id][3] += 1
 			self.errors[id][4] = self.ceros(self.time_passed_float())
+			return False
 
 	def pr(self, m, main="", function_name="", args=[], error=False, debug_reactive=""):
 		if error:
-			m = m + " - ERROR: " + str(error)
-			self.add_error(main, function_name, error)
+			if self.add_error(main, function_name, error):
+				m = m + " - ERROR: " + str(error)
 
 		self.messages.append(m)
 		if self.output_file:
@@ -159,10 +161,10 @@ class Debug:
 		self.pr("[{}] {} {}.{}{}".format(self.debug_n, self.time_passed(), main, function_name, args), main, function_name, args, error=error, debug_reactive=debug_reactive)
 
 	def debug(self, main, function_name, args=False, sep=False, error=False, mode=False, debug_reactive=""):
-		if self.debug_active:
+		if self.debug_active or error:
 			if not mode:
 				mode = self.debug_mode
-			if self.display_log:
+			if self.display_log or error:
 
 				self.debug_n += 1
 				self.debug_n_interval += 1
@@ -180,7 +182,7 @@ class Debug:
 		return d.debug
 
 	def __init__(self, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", interval_time=5, output_console=False, output_file=False):
-		self.debug_active = True
+		self.debug_active = False
 		self.output_file = output_file
 		self.display_log = log
 		if not self.display_log:

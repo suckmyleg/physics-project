@@ -15,9 +15,13 @@ class Simulation:
 
 	def reload(self):
 		self.debug("reload")
-		self.controlls.handle_events(self.controlls.actions)
-		self.phisics.reload()
-		self.controlls.actions = self.visuals.reload(self.phisics.objects)
+		try:
+			self.controlls.handle_events(self.controlls.actions)
+			self.phisics.reload()
+			self.controlls.actions = self.visuals.reload(self.phisics.objects)
+		except Exception as e:
+			self.debug("reload", error=e)
+
 
 	def setup(self):
 		self.debug("setup")
@@ -33,12 +37,7 @@ class Simulation:
 		self.actual_lvl = lvl
 		data = loads(open("data/{}.json".format(lvl), "r").read())
 
-		self.menus.loading_screen.start(len(data["objects"]), "Loading lvl")
-
-		try:
-			self.phisics.add_objects(data["objects"], fun=self.menus.loading_screen.add_loaded, fun_info=self.menus.loading_screen.change_loading_message)
-		except Exception as p:
-			self.debug("load_lvl", error=p)
+		self.menus.loading_screen.load(self.phisics.add_objects, data["objects"])
 
 	def start(self):
 		self.debug("start")
@@ -47,7 +46,7 @@ class Simulation:
 
 	def get_fps(self):
 		self.debug("get_fps")
-		return self.visuals.fps
+		return self.visuals.current_fps
 
 	def __init__(self, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", debug_interval_time=5, fps=60, keys_map=False, output_console=True, output_file=False):
 
@@ -60,7 +59,7 @@ class Simulation:
 		self.actual_lvl = False
 
 		self.phisics = PHISICS(self.Debug, self.get_fps)
-		self.visuals = VISUALS(debug=self.Debug, fps=fps)
+		self.visuals = VISUALS(self.phisics, debug=self.Debug, fps=fps)
 
 		self.controlls = CONTROLLS(keys_map, pygame, self.Debug, self)
 

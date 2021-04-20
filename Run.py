@@ -5,7 +5,7 @@ debug_mode = 5
 
 debug_reactive = "Args: %A Id: %I Function_name: %F\n"
 
-log = False
+log = True
 
 console_log = False
 
@@ -19,8 +19,8 @@ if len(sys.argv) > 1:
 		debug_reactive = sys.argv[2]
 
 keys_map = [
-		["scroll", 4, "zoom_in"],
-		["scroll", 5, "zoom_out"],
+		["scroll", 4, "debug_zoom_in"],
+		["scroll", 5, "debug_zoom_out"],
 		["k_down", "k_down", "debug_down"],
 		["k_down", "k_up", "debug_up"],
 		["k_hold", "k_rshift", "switch_debug"],
@@ -31,13 +31,21 @@ keys_map = [
 		["k_hold", "k_s", "object_move_back"],
 		["k_hold", "k_r", "reload_lvl"],
 		["click", 1, "spawn_new_rect"],
-		["k_hold", "k_f", "change_lvl"]
+		["k_hold", "k_l", "less_distance"],
+		["k_hold", "k_k", "more_distance"],
+		["k_hold", "k_f", "change_lvl"],
+		["k_hold", "k_c", "input_console"],
+		["k_hold", "k_i", "switch_objects_speeds"],
+		["k_hold", "k_b", "spawn_new_black_hole"],
+		["k_hold", "k_n", "spawn_new_rect"]
+		
+
 		]
 
-Simulation = main.Simulation(log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, fps=60, keys_map=keys_map, output_console=console_log, output_file=True, debug_interval_time=10)
+Simulation = main.Simulation(log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, fps=10000, keys_map=keys_map, output_console=console_log, output_file=True, debug_interval_time=10)
 
 Simulation.setup()
 
-Simulation.load_lvl(4)
+Simulation.load_lvl(2)
 
 Simulation.start()

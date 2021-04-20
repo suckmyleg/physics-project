@@ -1,3 +1,6 @@
+from threading import Thread
+import numpy as np
+
 class CONTROLLS:
 	#DEBUG CONTROLLS
 
@@ -40,30 +43,103 @@ class CONTROLLS:
 	def change_lvl(self):
 		self.main.load_lvl(6)
 
+	def help(self):
+		for k in self.commands.keys():
+			print(f"  --{k}")
+
+	def main_console(self):
+		while True:
+			self.execute_command()
+
+	def console(self):
+		Thread(target=self.main_console).start()
+
+
+	def input_console(self):
+		Thread(target=self.execute_command).start()
+
+
+
+	#SIMULATION CONTROLLS
+
+
+
+	def show_objects_speeds(self):
+		self.visuals.show_objects_speeds = True
+
+	def hide_objects_speeds(self):
+		self.visuals.show_objects_speeds = False
+
+	def switch_objects_speeds(self):
+		if self.visuals.show_objects_speeds:
+			self.visuals.show_objects_speeds = False
+		else:
+			self.visuals.show_objects_speeds = True
+
+
+
+	def show_objects_speeds_labels(self):
+		self.visuals.show_speed_labels = True
+
+	def hide_objects_speeds_labels(self):
+		self.visuals.show_speed_labels = False
+
+	def switch_objects_speeds_labels(self):
+		if self.visuals.show_speed_labels:
+			self.visuals.show_speed_labels = False
+		else:
+			self.visuals.show_speed_labels = True
+
+
+	def show_objects_speeds_gravity_direction(self):
+		self.visuals.show_speed_gravity_direction = True
+
+	def hide_objects_speeds_gravity_direction(self):
+		self.visuals.show_speed_gravity_direction = False
+
+	def switch_objects_speeds_gravity_direction(self):
+		if self.visuals.show_speed_gravity_direction:
+			self.visuals.show_speed_gravity_direction = False
+		else:
+			self.visuals.show_speed_gravity_direction = True
+
+
+	def more_distance(self):
+		self.phisics.distance_scale += 0.01
+
+	def less_distance(self):
+		self.phisics.distance_scale -= 0.01
 
 	#PLAYER CONTROLLS
 
 	def object_move_forward(self, object_id=0):
-		if not self.pause:
+		if not self.pause and len(self.phisics.objects) > 0:
 			self.debug("object_move_forward")
-			self.phisics.push_rect(self.phisics.objects[object_id], 0, -1)
+			self.phisics.objects[object_id].push([0, -0.1])
 
 	def object_move_back(self, object_id=0):
-		if not self.pause:
+		if not self.pause and len(self.phisics.objects) > 0:
 			self.debug("object_move_back")
-			self.phisics.push_rect(self.phisics.objects[object_id], 0, 1)
+			self.phisics.objects[object_id].push([0, 0.1])
 
 	def object_move_left(self, object_id=0):
-		if not self.pause:
+		if not self.pause and len(self.phisics.objects) > 0:
 			self.debug("object_move_left")
-			self.phisics.push_rect(self.phisics.objects[object_id], -1, 0)
+			self.phisics.objects[object_id].push([-0.1, 0])
 
 	def object_move_right(self, object_id=0):
-		if not self.pause:
+		if not self.pause and len(self.phisics.objects) > 0:
 			self.debug("object_move_right")
-			self.phisics.push_rect(self.phisics.objects[object_id], 1, 0)
+			self.phisics.objects[object_id].push([0.1, 0])
 
-	def spawn_new_rect(self, x, y, mass=100000000000, color=[150,1,250]):
+	def spawn_new_black_hole(self):
+
+		self.spawn_new_rect(mass=100000000000000, color=[50, 120, 150])
+
+	def spawn_new_rect(self, x=False, y=False, mass=1000000, color=[150,1,250]):
+		if x == False or y == False:
+			x, y = self.visuals.get_mouse_pos()
+
 		rect = {
     "visual": {
       "layer": 1,
@@ -90,6 +166,11 @@ class CONTROLLS:
   }
 		self.phisics.add_objects([rect])
 
+	def set_fps(self, fps=False):
+		if not fps:
+			fps = int(input("Fps: "))
+		self.visuals.fps = fps
+
 	def uknown_command(self):
 		self.debug("uknown_command")
 
@@ -102,7 +183,7 @@ class CONTROLLS:
 			pass
 
 		try:
-			function = self.commands[k[2]]
+			function = self.get_function_from_command(k[2])
 			if not function:
 				function = self.uknown_command
 				self.debug("setup_key", error="Uknwon command: {}".format(k[2]))
@@ -123,10 +204,43 @@ class CONTROLLS:
 
 
 	def get_function_from_command(self, command):
-		return self.commands[command]
+		try:
+			c = self.commands[command]
+		except:
+			try:
+				c = getattr(self, command)
+				self.commands[command] = c
+			except:
+				c = False
+		return c
 
-	def execute_command(self, command):
-		self.get_function_from_command(command)()
+	def execute_command(self, command=False):
+		args = []
+		if not command:
+			d = input("Command: ").split(" ")
+
+			if len(d) > 0:
+				command = d[0]
+				del d[0]
+				args = d
+			else:
+				command = d
+
+		c = self.get_function_from_command(command)
+
+		if c:
+			if len(args) > 0:
+				vecfun = np.vectorize(c)
+				print(args)
+				vecfun(args)
+			else:
+				try:
+					c()
+				except Exception as e:
+					self.debug("execute_command", error=e)
+
+		else:
+			print("Uknown command: {}".format(command))
 
 	def active_command(self, command):
 		if not command in self.active_commands:
@@ -198,10 +312,14 @@ class CONTROLLS:
 		
 		self.types = {"scroll":[pygame.MOUSEBUTTONDOWN], "k_down":[pygame.KEYDOWN], "k_up":[pygame.KEYUP], "k_hold":[pygame.KEYDOWN, pygame.KEYUP, "k_hold"], "click":[pygame.MOUSEBUTTONDOWN, "click"]}
 
-		self.keys = {"k_f":pygame.K_f, "k_down":pygame.K_DOWN, "k_up":pygame.K_UP, "k_space":pygame.K_SPACE, "k_rshift":pygame.K_RSHIFT, "k_escape":pygame.K_ESCAPE, "k_a":pygame.K_a, "k_s":pygame.K_s, "k_d":pygame.K_d, "k_w":pygame.K_w, "k_r":pygame.K_r}
+		self.keys = {"k_n":pygame.K_n, "k_b":pygame.K_b, "k_i":pygame.K_i, "k_c":pygame.K_c, "k_k":pygame.K_k, "k_l":pygame.K_l, "k_f":pygame.K_f, "k_down":pygame.K_DOWN, "k_up":pygame.K_UP, "k_space":pygame.K_SPACE, "k_rshift":pygame.K_RSHIFT, "k_escape":pygame.K_ESCAPE, "k_a":pygame.K_a, "k_s":pygame.K_s, "k_d":pygame.K_d, "k_w":pygame.K_w, "k_r":pygame.K_r}
 
-		self.commands = {"change_lvl":self.change_lvl, "spawn_new_rect":self.spawn_new_rect, "reload_lvl":self.reload_lvl, "object_move_forward":self.object_move_forward, "object_move_back":self.object_move_back, "object_move_left":self.object_move_left, "object_move_right":self.object_move_right, "switch_pause":self.switch_pause, "zoom_in":self.debug_zoom_in, "zoom_out":self.debug_zoom_out, "debug_down":self.debug_down, "debug_up":self.debug_up, "switch_debug":self.switch_debug}
-		
+		self.commands = {}
+
+		for a in dir(self):
+			if not "_" == a[0] and callable(a):
+				self.commands[a] = getattr(self, a)
+
 		self.active_commands = [] 
 
 		self.controlls = {}
@@ -209,3 +327,5 @@ class CONTROLLS:
 		self.actions = []
 
 		self.pause = False
+
+		self.console()
