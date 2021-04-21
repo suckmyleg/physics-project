@@ -32,9 +32,10 @@ class Force:
 			self.conn.y += self.y/fps
 
 class Object:
-	def setup_vectors(self):
+	def reload_center(self):
 		self.center_vector = [self.x + self.width/2, self.y + self.height/2]
 
+	def setup_vectors(self):
 		self.vectors = [
 			[self.x, self.y],
 			[self.x+self.width, self.y],
@@ -43,7 +44,9 @@ class Object:
 		]
 
 
-	def __init__(self, name="Object", x=0, y=0, speed=[0,0], width=5, height=5, static=False, mass=1, on_collission=False, color=[255, 0, 0]):
+	def __init__(self, phisics, name="Object", x=0, y=0, speed=[0,0], width=5, height=5, static=False, mass=1, on_collission=False, color=[255, 0, 0]):
+		self.phisics = phisics
+
 		self.name = name
 
 		self.x = x
@@ -52,19 +55,51 @@ class Object:
 		self.width = width
 		self.height = height
 
+		self.mass = mass
+
+		self.mg = self.mass * self.phisics.constants["G"]
+
 		self.speed = Force(self, speed[0], speed[1])
 
 		self.static = static
 
 		self.layer = 1
 
-		self.mass = mass
-
 		self.color = color
 
 		self.setup_vectors()
 
+		self.reload_center()
+
 		self.on_collission = on_collission
+
+	def interact(self):
+		if not self.static:
+			for o in self.phisics.objects:
+				if not o == self:
+					self.interact_with_obj(o)
+
+	def interact_with_obj(self, obj):
+		x = (obj.center_vector[0] - self.center_vector[0])*self.phisics.distance_scale
+		y = ((obj.center_vector[1] - self.center_vector[1])*self.phisics.distance_scale)
+
+		if y == 0 or x == 0:
+			h = x+y
+		else:
+			h = math.sqrt(((x)**2)+ ((y)**2))
+
+		r = abs(h)
+
+		i = 0
+
+		if r > 0:
+			i = (obj.mg/((r*self.phisics.distance_scale)**2))
+
+		angle = self.phisics.get_angle_from_x_y(x, y)
+
+		fx, fy = self.phisics.fx_fy(i, angle)
+
+		self.push([fx, fy])
 
 	def stop(self):
 		self.speed.stop()
@@ -73,8 +108,9 @@ class Object:
 		self.speed = speed
 
 	def reload(self, fps=1):
+		self.interact()
 		self.speed.reload(fps=fps)
-		self.setup_vectors()
+		self.reload_center()
 
 	def push(self, speed):
 		self.speed.push_x_y(speed[0], speed[1])
@@ -93,8 +129,7 @@ class PHISICS:
 
 	def act_react(self, o):
 		self.debug("act_react")
-		self.react_to_objects(o)
-		self.react_to_movement(o)
+		o.reload(fps=self.fps)
 
 	def load_objects(self, objects, fun=False, fun_info=False):
 		self.debug("load_objects")
@@ -110,18 +145,8 @@ class PHISICS:
 		self.objects.append(o)
 
 	def real_speed(self, speed):
+		self.debug("real_speed")
 		return speed/self.get_fps()
-
-	def react_to_objects(self, o):
-		self.debug("react_to_objects")
-		if not o.static:
-			self.react(o)
-
-
-	def react_to_movement(self, o):
-		self.debug("react_to_movement")
-		o.reload(fps=self.fps)
-
 
 	def push_rect(self, rect, x, y):
 		self.debug("push_rect")
@@ -130,7 +155,7 @@ class PHISICS:
 
 	def fx_fy(self, i, angle):
 		self.debug("fx_fy")
-		return math.sin(math.radians(angle))*i*(-1), math.cos(math.radians(angle))*i*(-1)
+		return math.sin(math.radians(angle))*i, math.cos(math.radians(angle))*i
 
 	def get_angle_from_x_y(self, x, y):
 		self.debug("get_angle_from_x_y")
@@ -160,42 +185,6 @@ class PHISICS:
 		#print("x:{} y:{} a: {} angle:{}".format(x, y, a, angle))
 
 		return angle
-
-
-	def react(self, objectt):
-		self.debug("react")
-		for o in self.objects:
-			if not objectt == o:
-				self.push_from_gravity(objectt, o)
-
-	def get_gravity_intensity(self, r, m, M):
-		self.debug("get_gravity_intensity")
-		r = abs(r)
-
-		if r > 0:
-			return (-self.constants["G"]*(M/((r*self.distance_scale)**2)))
-		else:
-			return 0
-
-	def push_from_gravity(self, obj1, obj2):
-		self.debug("push_from_gravity")
-
-		x = (obj2.center_vector[0] - obj1.center_vector[0])*self.distance_scale
-		y = ((obj2.center_vector[1] - obj1.center_vector[1])*self.distance_scale)
-
-		if y == 0 or x == 0:
-			h = x+y
-		else:
-			h = math.sqrt(((x)**2)+ ((y)**2))
-
-		i = self.get_gravity_intensity(h, obj1.mass, obj2.mass)
-
-		angle = self.get_angle_from_x_y(x, y)
-
-		fx, fy = self.fx_fy(i, angle)
-
-		obj1.push([fx, fy])
-
 
 	def distance_beetween_rects_centers(self, obj1, obj2):
 		self.debug("distance_beetween_rects_centers")
@@ -249,7 +238,7 @@ class PHISICS:
 			if exists:
 				speed = [o["collider"]["movement"]["x"], o["collider"]["movement"]["y"]]
 
-			o = Object(name="Object", x=o["visual"]["body"]["x"], y=o["visual"]["body"]["y"], static=o["collider"]["static"], speed=speed, width=5, height=5, mass=o["collider"]["mass"], on_collission=False, color=o["visual"]["color"])
+			o = Object(self, name="Object", x=o["visual"]["body"]["x"], y=o["visual"]["body"]["y"], static=o["collider"]["static"], speed=speed, width=5, height=5, mass=o["collider"]["mass"], on_collission=False, color=o["visual"]["color"])
 
 			self.objects.append(o)
 

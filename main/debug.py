@@ -1,4 +1,7 @@
 from time import time, sleep
+from json import dumps
+import inspect
+
 
 class Minidebug:
 	def __init__(self, main, mode, debug_reactive, fun):
@@ -23,13 +26,59 @@ class Debug:
 		if length > 0:
 			t = spacer*length
 		return "{}{}{}".format(m1, t, m2)
-			 
+			
+	def type_class(self, c):
+		try:
+			dir(c)
+		except:
+			return False
+		else:
+			return True
+
+	def safe(self, b):
+		if self.type_class(b):
+			b = str(b)
+		return b
+
+	def get_data_from_function(self, b, i=0):
+		i += 1
+		data = {}
+		if self.type_class(b):
+			if i < self.debug_function_analice_deep:
+				a = dir(b)
+				putted = False
+				for c in dir(b):
+					f = getattr(b, c)
+					if not callable(f) and not "__" in str(c) and not str(c) in ["denominator", "imag", "numerator", "real", "pygame"]:
+						putted = True
+						if self.type_class(f):
+							f = self.get_data_from_function(f, i)
+						else:
+							if type(f) in [list, dir]:
+								f = [self.get_data_from_function(p, i) for p in f]
+						data[str(c)] = f
+
+				if putted:
+					e = {}
+					e[str(b)] = data
+				else:
+					e = self.safe(b)
+			else:
+				e = self.safe(b)
+		else:
+			e = b
+
+		return e
+
+	def json_args(self, args):
+		return [self.get_data_from_function(b) for b in args]
 
 	def clean_args(self, args, s="(", e=")"):
 		if args:
 			args = "{}{}{}".format(s, args, e)
 		else:
 			args = "{}{}".format(s, e)
+
 		return args
 
 	def media(self):
@@ -96,6 +145,13 @@ class Debug:
 		if error:
 			if self.add_error(main, function_name, error):
 				m = m + " - ERROR: " + str(error)
+				if len(args) > 0:
+					self.main.menus.getting_error_info.start()
+					data = self.json_args(args)
+					open("errors/error_{}.json".format(time()), "w").write(dumps({"error":str(error), "main":main, "function":function_name, "args_info":data, "app_info":self.get_data_from_function(self.main)}, indent=5))
+					self.main.menus.getting_error_info.done()
+
+		args = self.clean_args(args)
 
 		self.messages.append(m)
 		if self.output_file:
@@ -104,21 +160,18 @@ class Debug:
 			print(m)
 
 	def deb_5(self, main, function_name, args, error=False, debug_reactive=""):
-		args = self.clean_args(args)
 
-		i1 = "{}.{}{} ".format(main, function_name, args)
+		i1 = "{}.{}{} ".format(main, function_name, self.clean_args(args))
 
 		i2 = self.space(self.space(f"t:[{self.ceros(self.time_passed_float())}]", f"m:[{self.media()}/s]", space_length=12), f"mi:[{self.interval_media()}/s]", space_length=25)
 
 		self.pr(self.space(i1, i2, space_length=45), main, function_name, args, error=error, debug_reactive=debug_reactive)
 
 	def deb_4(self, main, function_name, args, error=False, debug_reactive=""):
-		args = self.clean_args(args)
 
 		self.pr("[{}] {}.{}{}".format(int(self.time_passed_float()), main, function_name, args), main, function_name, args, error=error, debug_reactive=debug_reactive)
 
 	def deb_3(self, main, function_name, args, error=False, debug_reactive=""):
-		args = self.clean_args(args)
 
 		self.pr("[{}/s] [{}] [{}] {}.{}{}".format(self.interval_media(), self.debug_n, self.ceros(self.time_passed_float()), main, function_name, args), error=error)
 
@@ -151,12 +204,10 @@ class Debug:
 		self.pr(t, main, function_name, args, error=error, debug_reactive=debug_reactive)
 
 	def deb_1(self, main, function_name, args, error=False, debug_reactive=""):
-		args = self.clean_args(args)
 
 		self.pr("[{}/s] [{}] [{}] {}.{}{}".format(self.media(), self.debug_n, self.time_passed(), main, function_name, args), main, function_name, args, error=error, debug_reactive=debug_reactive)
 
 	def deb_0(self, main, function_name, args, error=False, debug_reactive=""):
-		args = self.clean_args(args)
 
 		self.pr("[{}] {} {}.{}{}".format(self.debug_n, self.time_passed(), main, function_name, args), main, function_name, args, error=error, debug_reactive=debug_reactive)
 
@@ -181,8 +232,9 @@ class Debug:
 		d = Minidebug(main, mode, reactive, self.debug)
 		return d.debug
 
-	def __init__(self, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", interval_time=5, output_console=False, output_file=False):
-		self.debug_active = False
+	def __init__(self, main, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", interval_time=5, output_console=False, output_file=False):
+		self.main = main
+		self.debug_active = True
 		self.output_file = output_file
 		self.display_log = log
 		if not self.display_log:
@@ -192,6 +244,7 @@ class Debug:
 		self.start_time_interval = time()
 		self.debug_n = 0
 		self.debug_n_interval = 0
+		self.debug_function_analice_deep = 4
 		self.interval_time = interval_time
 		self.debug_mode = debug_mode
 		self.modes = [self.deb_0, self.deb_1, self.deb_2, self.deb_3, self.deb_4, self.deb_5]

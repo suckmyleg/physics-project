@@ -44,18 +44,22 @@ class CONTROLLS:
 		self.main.load_lvl(6)
 
 	def help(self):
+		self.debug("help")
 		for k in self.commands.keys():
 			print(f"  --{k}")
 
 	def main_console(self):
+		self.debug("main_console")
 		while True:
 			self.execute_command()
 
 	def console(self):
+		self.debug("console")
 		Thread(target=self.main_console).start()
 
 
 	def input_console(self):
+		self.debug("input_console")
 		Thread(target=self.execute_command).start()
 
 
@@ -65,12 +69,15 @@ class CONTROLLS:
 
 
 	def show_objects_speeds(self):
+		self.debug("show_objects_speeds")
 		self.visuals.show_objects_speeds = True
 
 	def hide_objects_speeds(self):
+		self.debug("hide_objects_speeds")
 		self.visuals.show_objects_speeds = False
 
 	def switch_objects_speeds(self):
+		self.debug("switch_objects_speeds")
 		if self.visuals.show_objects_speeds:
 			self.visuals.show_objects_speeds = False
 		else:
@@ -79,12 +86,15 @@ class CONTROLLS:
 
 
 	def show_objects_speeds_labels(self):
+		self.debug("show_objects_speeds_labels")
 		self.visuals.show_speed_labels = True
 
 	def hide_objects_speeds_labels(self):
+		self.debug("hide_objects_speeds_labels")
 		self.visuals.show_speed_labels = False
 
 	def switch_objects_speeds_labels(self):
+		self.debug("switch_objects_speeds_labels")
 		if self.visuals.show_speed_labels:
 			self.visuals.show_speed_labels = False
 		else:
@@ -92,12 +102,15 @@ class CONTROLLS:
 
 
 	def show_objects_speeds_gravity_direction(self):
+		self.debug("show_objects_speeds_gravity_direction")
 		self.visuals.show_speed_gravity_direction = True
 
 	def hide_objects_speeds_gravity_direction(self):
+		self.debug("hide_objects_speeds_gravity_direction")
 		self.visuals.show_speed_gravity_direction = False
 
 	def switch_objects_speeds_gravity_direction(self):
+		self.debug("switch_objects_speeds_gravity_direction")
 		if self.visuals.show_speed_gravity_direction:
 			self.visuals.show_speed_gravity_direction = False
 		else:
@@ -105,9 +118,11 @@ class CONTROLLS:
 
 
 	def more_distance(self):
+		self.debug("more_distance")
 		self.phisics.distance_scale += 0.01
 
 	def less_distance(self):
+		self.debug("less_distance")
 		self.phisics.distance_scale -= 0.01
 
 	#PLAYER CONTROLLS
@@ -133,10 +148,11 @@ class CONTROLLS:
 			self.phisics.objects[object_id].push([0.1, 0])
 
 	def spawn_new_black_hole(self):
-
+		self.debug("spawn_new_black_hole")
 		self.spawn_new_rect(mass=100000000000000, color=[50, 120, 150])
 
 	def spawn_new_rect(self, x=False, y=False, mass=1000000, color=[150,1,250]):
+		self.debug("spawn_new_rect")
 		if x == False or y == False:
 			x, y = self.visuals.get_mouse_pos()
 
@@ -167,6 +183,7 @@ class CONTROLLS:
 		self.phisics.add_objects([rect])
 
 	def set_fps(self, fps=False):
+		self.debug("set_fps")
 		if not fps:
 			fps = int(input("Fps: "))
 		self.visuals.fps = fps
@@ -204,6 +221,7 @@ class CONTROLLS:
 
 
 	def get_function_from_command(self, command):
+		self.debug("get_function_from_command")
 		try:
 			c = self.commands[command]
 		except:
@@ -215,6 +233,7 @@ class CONTROLLS:
 		return c
 
 	def execute_command(self, command=False):
+		self.debug("execute_command")
 		args = []
 		if not command:
 			d = input("Command: ").split(" ")
@@ -243,19 +262,23 @@ class CONTROLLS:
 			print("Uknown command: {}".format(command))
 
 	def active_command(self, command):
+		self.debug("active_command")
 		if not command in self.active_commands:
 			self.active_commands.append(command)
 
 	def inactive_command(self, command):
+		self.debug("inactive_command")
 		if command in self.active_commands:
 			del self.active_commands[self.active_commands.index(command)]
 
 	def get_type_of_event(self, event):
+		self.debug("get_type_of_event")
 		for t in self.types.keys():
 			if event.type in self.types[t]:
 				return t
 
 	def get_value_from_event(self, e, event_type):
+		self.debug("get_value_from_event")
 		if event_type == "scroll" or event_type == "click":
 			return e.button
 		else:

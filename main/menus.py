@@ -1,11 +1,12 @@
 from threading import Thread
 
 class Loading_screen:
-	def __init__(self, debug, visuals, p):
+	def __init__(self, debug, visuals, phisics):
 		self.debug = debug.get_debug("LOADING_SCREEN")
 		self.debug("__init__")
 
 		self.visuals = visuals
+		self.phisics = phisics
 		self.loading = False
 
 		self.loading_message = "Loading"
@@ -19,6 +20,7 @@ class Loading_screen:
 
 
 	def load(self, fun, objects, title="Loading"):
+		self.phisics.pause = True
 		t = Thread(target=self.start, args=(len(objects), title))
 		t.start()
 
@@ -31,6 +33,8 @@ class Loading_screen:
 			self.debug("load", error=e)
 
 		self.loading = False
+
+		self.phisics.pause = False
 
 	def start(self, to_load, title):
 		self.debug("start")
@@ -136,7 +140,45 @@ class Loading_screen:
 
 		
 
+class Error_info:
+	def __init__(self, debug, visuals, phisics):
+		self.debug = debug.get_debug("ERROR_INFO")
+		self.debug("__init__")
 
+		self.visuals = visuals
+		self.phisics = phisics
+
+	def display_message(self, color=(0,128,255)):
+		self.debug("display_message")
+
+		message = "An error ocurred. Wait until the data is compiled."
+
+		label = self.visuals.myFont.render(str(message), True, color)
+		self.visuals.screen.blit(label, ((self.visuals.width-len(message))/2, 200))
+
+	def reload_loading_screen(self):
+		self.debug("reload_loading_screen")
+		actions = self.visuals.get_actions()
+		self.visuals.clear_screen(color=(0, 0, 100))
+		self.display_message()
+		self.visuals.screen_info()
+		self.visuals.update_screen()
+		return actions
+
+	def done(self):
+		self.status = False
+
+	def error(self):
+		self.debug("error")
+		while self.status:
+			actions = self.reload_loading_screen()
+
+
+
+	def start(self):
+		self.debug("start")
+		self.status = True
+		t = Thread(target=self.error).start()
 
 
 class MENUS:
@@ -168,7 +210,7 @@ class MENUS:
 
 		self.phisics = phisics
 
-		self.menus = [[Loading_screen, "loading_screen"]]
+		self.menus = [[Loading_screen, "loading_screen"], [Error_info , "getting_error_info"]]
 
 		self.n_menus = 0
 

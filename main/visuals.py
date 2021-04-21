@@ -92,6 +92,7 @@ class VISUALS:
 			self.debug_errors()
 
 	def show_messages_folder(self, title, messages, fun=False):
+		self.debug("show_messages_folder")
 		if not fun:
 			fun = self.show_messages
 
@@ -171,6 +172,7 @@ class VISUALS:
 		return pygame.event.get()
 
 	def remove_out(self, objects):
+		self.debug("remove_out")
 		
 		for o in objects:
 			if o.x > self.width or o.x < 0:
@@ -188,7 +190,7 @@ class VISUALS:
 			for o in objects:#self.order_objects_by_layers(objects):
 				self.draw_object(o)
 		except Exception as e:
-			self.debug("draw_object", error=e)
+			self.debug("draw_objects", args=phisics_objects, error=e)
 
 	def change_font_size(self, font_size):
 		self.debug("change_font_size")
@@ -222,7 +224,7 @@ class VISUALS:
 		self.fps = fps
 		self.current_fps = fps
 		self.show_objects_speeds = False
-		self.show_speed_labels = True
+		self.show_speed_labels = False
 		self.show_speed_gravity_direction = True
 		self.fpsClock = pygame.time.Clock()
 		pygame.init()
