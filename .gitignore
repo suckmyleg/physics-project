@@ -1,5 +1,7 @@
 
 main/tests.py
+log.txt
+errors/
 main/__pycache__/phisics.cpython-39.pyc
 main/__pycache__/phisics.cpython-39.pyc
 *.pyc
