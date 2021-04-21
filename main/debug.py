@@ -234,7 +234,7 @@ class Debug:
 
 	def __init__(self, main, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", interval_time=5, output_console=False, output_file=False):
 		self.main = main
-		self.debug_active = True
+		self.debug_active = False
 		self.output_file = output_file
 		self.display_log = log
 		if not self.display_log:
