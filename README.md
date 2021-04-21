@@ -19,7 +19,7 @@ For general, the phisics will have the next rules:
 
 # Things to do
   * Colissions
-  * Forces
-  * Movements
+  * Forces Done
+  * Movements Done
   * Light
-  * Objects
+  * Objects Done
