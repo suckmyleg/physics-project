@@ -3,6 +3,12 @@ import math
 import copy
 from time import sleep
 
+def fix_color(color):
+	if color > 260:
+		return 260
+	else:
+		return int(color)
+
 class Force:
 	def __init__(self, conn, x=0, y=0, h=0, angle=0):
 		self.conn = conn
@@ -44,10 +50,12 @@ class Object:
 		]
 
 
-	def __init__(self, phisics, name="Object", x=0, y=0, speed=[0,0], width=5, height=5, static=False, mass=1, on_collission=False, color=[255, 0, 0]):
+	def __init__(self, phisics, name="Object", id=False, x=0, y=0, speed=[0,0], width=5, height=5, mass=1, static=False, layer=1, color=[255, 0, 0], on_collission=False):
 		self.phisics = phisics
 
 		self.name = name
+
+		self.id = id
 
 		self.x = x
 		self.y = y
@@ -57,13 +65,16 @@ class Object:
 
 		self.mass = mass
 
-		self.mg = self.mass * self.phisics.constants["G"]
+		#self.mg = self.mass * self.phisics.constants["G"]
 
-		self.speed = Force(self, speed[0], speed[1])
+		try:
+			self.speed = Force(self, speed[0], speed[1])
+		except:
+			self.speed = speed
 
 		self.static = static
 
-		self.layer = 1
+		self.layer = layer
 
 		self.color = color
 
@@ -72,6 +83,9 @@ class Object:
 		self.reload_center()
 
 		self.on_collission = on_collission
+
+	def toList(self):
+		return [self.phisics, self.name, self.id, self.x, self.y, self.speed,  self.width, self.height, self.mass, self.static, self.layer, self.color, self.on_collission]
 
 	def interact(self):
 		if not self.static:
@@ -90,16 +104,27 @@ class Object:
 
 		r = abs(h)
 
-		i = 0
+		if r > self.width/2:
 
-		if r > 0:
-			i = (obj.mg/((r*self.phisics.distance_scale)**2))
+			i = 0
 
-		angle = self.phisics.get_angle_from_x_y(x, y)
+			if r > 0:
+				i = (obj.mass * self.phisics.constants["G"]/((r*self.phisics.distance_scale)**2))
 
-		fx, fy = self.phisics.fx_fy(i, angle)
+			angle = self.phisics.get_angle_from_x_y(x, y)
 
-		self.push([fx, fy])
+			fx, fy = self.phisics.fx_fy(i, angle)
+
+			self.push([fx, fy])
+
+		else:
+			if False and self.speed.total_speed < obj.speed.total_speed:
+				self.mass += obj.mass
+				self.height += 0.01
+				self.width += 0.01
+				self.color = [int((self.color[a]+obj.color[a])/2) for a in range(3)]
+				#print(self.color)
+				self.phisics.remove(obj)
 
 	def stop(self):
 		self.speed.stop()
@@ -114,6 +139,9 @@ class Object:
 
 	def push(self, speed):
 		self.speed.push_x_y(speed[0], speed[1])
+
+	def remove(self):
+		self.phisics.remove(self)
 
 class PHISICS:
 	def main(self):
@@ -153,6 +181,10 @@ class PHISICS:
 		rect["collider"]["movement"]["x"] += self.real_speed(x)
 		rect["collider"]["movement"]["y"] += self.real_speed(y)
 
+	def remove(self, o):
+		del self.objects[o.id]
+		self.reload_objects_ids()
+
 	def fx_fy(self, i, angle):
 		self.debug("fx_fy")
 		return math.sin(math.radians(angle))*i, math.cos(math.radians(angle))*i
@@ -160,27 +192,20 @@ class PHISICS:
 	def get_angle_from_x_y(self, x, y):
 		self.debug("get_angle_from_x_y")
 
-		if x == 0:
-			if y >= 0:
+		if y == 0:
+			if x >= 0:
 				return 0
 			else:
 				return 180
 
-		if x < 0:
-			if y > 0:
-				angle = 270
-			else:
-				angle = 180
+		angle = math.atan(float(x)/float(y))
 
-		else:
-			if y > 0:
-				angle = 0
-			else:
-				angle = 90
+		angle *= 180/math.pi
 
-		a = math.degrees(abs(math.atan(y/x)))
+		if y < 0:
+		   angle += 180
 
-		angle += a
+		#print(angle, x, y)
 
 		#print("x:{} y:{} a: {} angle:{}".format(x, y, a, angle))
 
@@ -217,6 +242,10 @@ class PHISICS:
 
 		return self.find_point_in_area(x1, y1, x2, y2, x, y)
 
+	def reload_objects_ids(self):
+		for o in self.objects:
+			o.id = self.objects.index(o)
+
 	def setup_objects(self, objectss, fun=False, fun_info=False):
 		self.debug("setup_objects", args=[objectss])
 		objects = copy.deepcopy(objectss)
@@ -242,8 +271,11 @@ class PHISICS:
 
 			self.objects.append(o)
 
+			o.id = self.objects.index(o)
+
 			if fun:
 				fun()
+
 
 	def __init__(self, debug, get_fps):
 		self.debug = debug.get_debug("PHISICS")

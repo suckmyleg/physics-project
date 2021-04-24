@@ -42,7 +42,7 @@ keys_map = [
 
 		]
 
-Simulation = main.Simulation(log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, fps=10000, keys_map=keys_map, output_console=console_log, output_file=True, debug_interval_time=10)
+Simulation = main.Simulation(False, log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, fps=6000, keys_map=keys_map, output_console=console_log, output_file=True, debug_interval_time=10)
 
 Simulation.setup()
 

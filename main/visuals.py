@@ -164,7 +164,7 @@ class VISUALS:
 			self.draw_objects(objects)
 		self.info()
 		self.update_screen()
-		self.fpsClock.tick(self.fps)
+		self.clock.tick(self.fps)
 		return actions
 
 	def get_actions(self):
@@ -176,21 +176,20 @@ class VISUALS:
 		
 		for o in objects:
 			if o.x > self.width or o.x < 0:
-				del objects[objects.index(o)]
+				o.remove()
 			else:
 				if o.y > self.height or o.y < 0:
-					del objects[objects.index(o)]
+					o.remove()
 
 	def draw_objects(self, phisics_objects):
 		try:
 			self.remove_out(phisics_objects)
-			objects = copy.deepcopy(phisics_objects)
 			self.debug("draw_objects")
 
-			for o in objects:#self.order_objects_by_layers(objects):
+			for o in phisics_objects:
 				self.draw_object(o)
 		except Exception as e:
-			self.debug("draw_objects", args=phisics_objects, error=e)
+			self.debug("draw_objects", error=e)
 
 	def change_font_size(self, font_size):
 		self.debug("change_font_size")
@@ -226,7 +225,6 @@ class VISUALS:
 		self.show_objects_speeds = False
 		self.show_speed_labels = False
 		self.show_speed_gravity_direction = True
-		self.fpsClock = pygame.time.Clock()
 		pygame.init()
 		self.screen = pygame.display.set_mode((self.width, self.height))
 		self.pygame = pygame

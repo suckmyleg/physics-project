@@ -1,6 +1,7 @@
 from time import time, sleep
 from json import dumps
 import inspect
+import platform, socket, re, uuid, psutil, logging
 
 
 class Minidebug:
@@ -141,23 +142,47 @@ class Debug:
 			self.errors[id][4] = self.ceros(self.time_passed_float())
 			return False
 
+	def get_computer_info(self):
+		try:
+			info={}
+			info['platform']=platform.system()
+			info['platform-release']=platform.release()
+			info['platform-version']=platform.version()
+			info['architecture']=platform.machine()
+			info['hostname']=socket.gethostname()
+			info['ip-address']=socket.gethostbyname(socket.gethostname())
+			info['mac-address']=':'.join(re.findall('..', '%012x' % uuid.getnode()))
+			info['processor']=platform.processor()
+			info['ram']=str(round(psutil.virtual_memory().total / (1024.0 **3)))+" GB"
+			return info
+		except Exception as e:
+			logging.exception(e)
+		return False
+
 	def pr(self, m, main="", function_name="", args=[], error=False, debug_reactive=""):
+
+		if self.output_file:
+			self.file.write(m + "\n")
+		if self.debug_active:
+			self.messages.append(m)
+			if self.output_console :
+				print(m)
+
 		if error:
 			if self.add_error(main, function_name, error):
 				m = m + " - ERROR: " + str(error)
-				if len(args) > 0:
-					self.main.menus.getting_error_info.start()
-					data = self.json_args(args)
-					open("errors/error_{}.json".format(time()), "w").write(dumps({"error":str(error), "main":main, "function":function_name, "args_info":data, "app_info":self.get_data_from_function(self.main)}, indent=5))
-					self.main.menus.getting_error_info.done()
+				self.main.menus.getting_error_info.start()
+				data = self.json_args(self.get_data_from_function(args))
 
-		args = self.clean_args(args)
-
-		self.messages.append(m)
-		if self.output_file:
-			self.file.write(m + "\n")
-		if self.output_console:
-			print(m)
+				full_data = {"error":str(error), 
+				"main":main, 
+				"function":function_name, 
+				"args_info":data, 
+				"app_info":self.get_data_from_function(self.main), 
+				"computer_info":self.computer_info, 
+				"log":self.messages_history}
+				open("errors/error_{}.json".format(time()), "w").write(dumps(full_data, indent=5))
+				self.main.menus.getting_error_info.done()
 
 	def deb_5(self, main, function_name, args, error=False, debug_reactive=""):
 
@@ -221,6 +246,7 @@ class Debug:
 				self.debug_n_interval += 1
 					
 				if sep:
+					self.messages_history += self.messages
 					self.messages = []
 					self.pr("\n-------{}".format(sep))
 
@@ -232,9 +258,9 @@ class Debug:
 		d = Minidebug(main, mode, reactive, self.debug)
 		return d.debug
 
-	def __init__(self, main, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", interval_time=5, output_console=False, output_file=False):
+	def __init__(self, main, debug_active, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", interval_time=5, output_console=False, output_file=False):
 		self.main = main
-		self.debug_active = False
+		self.debug_active = debug_active
 		self.output_file = output_file
 		self.display_log = log
 		if not self.display_log:
@@ -244,11 +270,14 @@ class Debug:
 		self.start_time_interval = time()
 		self.debug_n = 0
 		self.debug_n_interval = 0
-		self.debug_function_analice_deep = 4
+		self.debug_function_analice_deep = 2
 		self.interval_time = interval_time
 		self.debug_mode = debug_mode
 		self.modes = [self.deb_0, self.deb_1, self.deb_2, self.deb_3, self.deb_4, self.deb_5]
 		self.debug_reactive = debug_reactive
 		self.messages = []
+		self.messages_history = []
 		self.errors = []
 		self.file = open("log.txt", "w")
+
+		self.computer_info = self.get_computer_info()

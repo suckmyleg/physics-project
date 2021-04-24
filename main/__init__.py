@@ -6,6 +6,7 @@ from main.menus import *
 import time
 import copy
 from json import loads
+from time import sleep
 
 class Simulation:
 	def main(self):
@@ -15,12 +16,15 @@ class Simulation:
 
 	def reload(self):
 		self.debug("reload")
-		try:
-			self.controlls.handle_events(self.controlls.actions)
-			self.phisics.reload()
-			self.controlls.actions = self.visuals.reload(self.phisics.objects)
-		except Exception as e:
-			self.debug("reload", error=e)
+		if self.main_status:
+			try:
+				self.controlls.handle_events(self.controlls.actions)
+				self.phisics.reload()
+				self.controlls.actions = self.visuals.reload(self.phisics.objects)
+			except Exception as e:
+				self.debug("reload", error=e)
+		else:
+			sleep(0.5)
 
 
 	def setup(self):
@@ -48,9 +52,9 @@ class Simulation:
 		self.debug("get_fps")
 		return self.visuals.current_fps
 
-	def __init__(self, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", debug_interval_time=5, fps=60, keys_map=False, output_console=True, output_file=False):
+	def __init__(self, log_active=False, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", debug_interval_time=5, fps=60, keys_map=False, output_console=True, output_file=False):
 
-		self.Debug = Debug(self, log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, interval_time=debug_interval_time, output_console=output_console, output_file=output_file)
+		self.Debug = Debug(self, log_active, log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, interval_time=debug_interval_time, output_console=output_console, output_file=output_file)
 
 		self.debug = self.Debug.get_debug("Simulation", debug_mode)
 
@@ -63,13 +67,15 @@ class Simulation:
 
 		self.controlls = CONTROLLS(keys_map, pygame, self.Debug, self)
 
-		self.menus = MENUS(self.Debug, self.visuals, self.phisics)
+		self.menus = MENUS(self.Debug, self.visuals, self.phisics, self)
 
 		self.to_load = 0
 
 		self.loaded = 0
 
 		self.loading = False
+
+		self.main_status = True
 
 		self.debug_mode = debug_mode
 

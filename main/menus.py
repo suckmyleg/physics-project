@@ -1,10 +1,34 @@
 from threading import Thread
+from time import sleep
+from main.phisics import Object
+
+def object_copy(instance, init_args=None):
+    if init_args:
+        new_obj = instance.__class__(**init_args)
+    else:
+        new_obj = instance.__class__()
+    if hasattr(instance, '__dict__'):
+        for k in instance.__dict__ :
+            try:
+                attr_copy = copy.deepcopy(getattr(instance, k))
+            except Exception as e:
+                attr_copy = object_copy(getattr(instance, k))
+            setattr(new_obj, k, attr_copy)
+
+        new_attrs = list(new_obj.__dict__.keys())
+        for k in new_attrs:
+            if not hasattr(instance, k):
+                delattr(new_obj, k)
+        return new_obj
+    else:
+        return instance
 
 class Loading_screen:
-	def __init__(self, debug, visuals, phisics):
+	def __init__(self, debug, visuals, phisics, main):
 		self.debug = debug.get_debug("LOADING_SCREEN")
 		self.debug("__init__")
 
+		self.main = main
 		self.visuals = visuals
 		self.phisics = phisics
 		self.loading = False
@@ -34,8 +58,6 @@ class Loading_screen:
 
 		self.loading = False
 
-		self.phisics.pause = False
-
 	def start(self, to_load, title):
 		self.debug("start")
 		self.loading = True
@@ -46,6 +68,8 @@ class Loading_screen:
 		self.loading_screen_title = title
 
 		self.loading_screen()
+
+		self.phisics.pause = False
 
 	#LOGIC
 
@@ -141,10 +165,11 @@ class Loading_screen:
 		
 
 class Error_info:
-	def __init__(self, debug, visuals, phisics):
+	def __init__(self, debug, visuals, phisics, main):
 		self.debug = debug.get_debug("ERROR_INFO")
 		self.debug("__init__")
 
+		self.main = main
 		self.visuals = visuals
 		self.phisics = phisics
 
@@ -170,37 +195,90 @@ class Error_info:
 
 	def error(self):
 		self.debug("error")
+		self.status = True
+		self.phisics.pause = True
 		while self.status:
 			actions = self.reload_loading_screen()
+		self.phisics.pause = False
 
 
 
 	def start(self):
 		self.debug("start")
-		self.status = True
 		t = Thread(target=self.error).start()
 
+class RECORDING:
+	def __init__(self, debug, visuals, phisics, main):
+		self.debug = debug.get_debug("RECORDING")
+		self.debug("__init__")
+		self.main = main
+		self.visuals = visuals
+		self.phisics = phisics
+		self.recording = False
+		self.objects_backup = [] 
+		self.record_data = []
+		self.status = False
+		self.recording_fps = 30
+		self.delay = 1 / self.recording_fps
+
+	def grab_frames(self):
+		self.debug("grab_frames")
+		while self.status:
+			self.record_data.append([o.toList() for o in self.phisics.objects])
+			sleep(self.delay)
+
+	def record(self):
+		self.debug("record")
+		print("Recording")
+		self.recording = True
+		self.record_data = []
+		self.status = True
+		Thread(target=self.grab_frames).start()
+
+	def stop(self):
+		self.debug("stop")
+		print("Stopped recording")
+		self.status = False
+
+	def play(self):
+		self.debug("play")
+		self.phisics.pause = True
+		self.objects_backup = self.phisics.objects
+		self.phisics.objects = []
+		self.main.main_status = False
+		print("Playing...")
+		for objects in self.record_data:
+			controlls_actions = self.visuals.reload([Object(*o) for o in objects])
+		print("Finished playing")
+		self.phisics.pause = False
+		self.phisics.objects = self.objects_backup
+		self.main.main_status = True
 
 class MENUS:
 	def setup_menus(self):
+		self.debug("setup_menus")
 		for m in self.menus:
 			self.add_menu(m[1], m[0])
 			self.start_menu(m[1])
 
 	def start_menu(self, name):
-		return setattr(self, name, self.get_menu_function(name)(self.Debug, self.visuals, self.phisics))
+		self.debug("start_menu")
+		return setattr(self, name, self.get_menu_function(name)(self.Debug, self.visuals, self.phisics, self.main))
 
 	def get_menu_function(self, name):
+		self.debug("get_menu_function")
 		return getattr(self, name+"_function")
 
 	def get_menu(self, name):
+		self.debug("get_menu")
 		return getattr(self, name)
 
 	def add_menu(self, name, menu):
+		self.debug("add_menu")
 		setattr(self, name+"_function", menu)
 		self.n_menus += 1
 
-	def __init__(self, debug, visuals, phisics):
+	def __init__(self, debug, visuals, phisics, main):
 		self.Debug = debug
 
 		self.debug = self.Debug.get_debug("MENUS")
@@ -210,7 +288,9 @@ class MENUS:
 
 		self.phisics = phisics
 
-		self.menus = [[Loading_screen, "loading_screen"], [Error_info , "getting_error_info"]]
+		self.main = main
+
+		self.menus = [[Loading_screen, "loading_screen"], [Error_info , "getting_error_info"], [RECORDING, "recording"]]
 
 		self.n_menus = 0
 

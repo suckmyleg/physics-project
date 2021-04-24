@@ -66,6 +66,17 @@ class CONTROLLS:
 
 	#SIMULATION CONTROLLS
 
+	def reverse(self):
+		self.phisics.distance_scale *= -1
+
+	def start_recording(self):
+		self.main.menus.recording.record()
+
+	def stop_recording(self):
+		self.main.menus.recording.stop()
+
+	def play_recording(self):
+		self.main.menus.recording.play()
 
 
 	def show_objects_speeds(self):
@@ -149,9 +160,9 @@ class CONTROLLS:
 
 	def spawn_new_black_hole(self):
 		self.debug("spawn_new_black_hole")
-		self.spawn_new_rect(mass=100000000000000, color=[50, 120, 150])
+		self.spawn_new_rect(mass=100000000000000, color=[50, 120, 150], static=True)
 
-	def spawn_new_rect(self, x=False, y=False, mass=1000000, color=[150,1,250]):
+	def spawn_new_rect(self, x=False, y=False, mass=1000000, color=[150,1,250], static=False):
 		self.debug("spawn_new_rect")
 		if x == False or y == False:
 			x, y = self.visuals.get_mouse_pos()
@@ -171,7 +182,7 @@ class CONTROLLS:
     },
     "collider": {
       "mass": mass,
-      "static": False,
+      "static": static,
       "body": {
         "x": x,
         "y": y,
