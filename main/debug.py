@@ -270,7 +270,7 @@ class Debug:
 		self.start_time_interval = time()
 		self.debug_n = 0
 		self.debug_n_interval = 0
-		self.debug_function_analice_deep = 2
+		self.debug_function_analice_deep = 3
 		self.interval_time = interval_time
 		self.debug_mode = debug_mode
 		self.modes = [self.deb_0, self.deb_1, self.deb_2, self.deb_3, self.deb_4, self.deb_5]

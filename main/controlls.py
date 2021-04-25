@@ -79,6 +79,23 @@ class CONTROLLS:
 		self.main.menus.recording.play()
 
 
+
+	def show_precise_mode(self):
+		self.debug("show_precise_mode")
+		self.phisics.precise_mode = True
+
+	def hide_precise_mode(self):
+		self.debug("hide_precise_mode")
+		self.phisics.precise_mode = False
+
+	def switch_precise_mode(self):
+		self.debug("switch_precise_mode")
+		if self.phisics.precise_mode:
+			self.phisics.precise_mode = False
+		else:
+			self.phisics.precise_mode = True
+
+
 	def show_objects_speeds(self):
 		self.debug("show_objects_speeds")
 		self.visuals.show_objects_speeds = True
@@ -162,7 +179,7 @@ class CONTROLLS:
 		self.debug("spawn_new_black_hole")
 		self.spawn_new_rect(mass=100000000000000, color=[50, 120, 150], static=True)
 
-	def spawn_new_rect(self, x=False, y=False, mass=1000000, color=[150,1,250], static=False):
+	def spawn_new_rect(self, x=False, y=False, mass=1000000, speedx=0, speedy=0, color=[150,1,250], static=False):
 		self.debug("spawn_new_rect")
 		if x == False or y == False:
 			x, y = self.visuals.get_mouse_pos()
@@ -183,6 +200,11 @@ class CONTROLLS:
     "collider": {
       "mass": mass,
       "static": static,
+      "movement":
+      {
+      "x":speedx,
+      "y":speedy
+      },
       "body": {
         "x": x,
         "y": y,
@@ -192,6 +214,7 @@ class CONTROLLS:
     }
   }
 		self.phisics.add_objects([rect])
+
 
 	def set_fps(self, fps=False):
 		self.debug("set_fps")
@@ -206,10 +229,12 @@ class CONTROLLS:
 		key = k[1]
 
 		try:
-			key = self.keys[k[1]]
+			key = getattr(self.pygame, k[1].lower().replace("k_", "K_"))
 		except:
-			pass
-
+			try:
+				key = getattr(self.pygame, k[1].upper())
+			except:
+				pass
 		try:
 			function = self.get_function_from_command(k[2])
 			if not function:
@@ -252,7 +277,13 @@ class CONTROLLS:
 			if len(d) > 0:
 				command = d[0]
 				del d[0]
-				args = d
+
+				for a in d:
+					try:
+						a = float(a)
+					except:
+						pass
+					args.append(a)
 			else:
 				command = d
 
@@ -260,9 +291,7 @@ class CONTROLLS:
 
 		if c:
 			if len(args) > 0:
-				vecfun = np.vectorize(c)
-				print(args)
-				vecfun(args)
+				c(*args)
 			else:
 				try:
 					c()

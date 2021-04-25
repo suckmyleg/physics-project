@@ -33,6 +33,9 @@ class Force:
 		self.interactions = []
 
 	def reload(self, fps=1):
+		if self.conn.phisics.precise_mode:
+			fps = 10000
+
 		if not fps == 0:
 			self.conn.x += self.x/fps
 			self.conn.y += self.y/fps
@@ -85,7 +88,7 @@ class Object:
 		self.on_collission = on_collission
 
 	def toList(self):
-		return [self.phisics, self.name, self.id, self.x, self.y, self.speed,  self.width, self.height, self.mass, self.static, self.layer, self.color, self.on_collission]
+		return [self.name, self.id, self.x, self.y, [self.speed.x, self.speed.y],  self.width, self.height, self.mass, self.static, self.layer, self.color, self.on_collission]
 
 	def interact(self):
 		if not self.static:
@@ -133,6 +136,7 @@ class Object:
 		self.speed = speed
 
 	def reload(self, fps=1):
+		self.speed.reset()
 		self.interact()
 		self.speed.reload(fps=fps)
 		self.reload_center()
@@ -152,12 +156,7 @@ class PHISICS:
 		self.fps = self.get_fps()
 		if not self.pause:
 			for o in self.objects:
-				o.speed.reset()
-				self.act_react(o)
-
-	def act_react(self, o):
-		self.debug("act_react")
-		o.reload(fps=self.fps)
+				o.reload(self.fps)
 
 	def load_objects(self, objects, fun=False, fun_info=False):
 		self.debug("load_objects")
@@ -284,6 +283,8 @@ class PHISICS:
 		self.get_fps = get_fps
 
 		self.fps = 0
+
+		self.precise_mode = True
 
 		self.distance_scale = 0.5
 

@@ -46,6 +46,6 @@ Simulation = main.Simulation(False, log=log, debug_mode=debug_mode, debug_reacti
 
 Simulation.setup()
 
-Simulation.load_lvl(2)
+Simulation.load_lvl(5)
 
 Simulation.start()

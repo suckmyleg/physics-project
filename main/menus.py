@@ -1,6 +1,7 @@
 from threading import Thread
-from time import sleep
+from time import sleep, time
 from main.phisics import Object
+import json
 
 def object_copy(instance, init_args=None):
     if init_args:
@@ -215,17 +216,35 @@ class RECORDING:
 		self.visuals = visuals
 		self.phisics = phisics
 		self.recording = False
+		self.recording_file = False
 		self.objects_backup = [] 
 		self.record_data = []
 		self.status = False
-		self.recording_fps = 30
+		self.recording_fps = 90
 		self.delay = 1 / self.recording_fps
+		self.mode = 2
+		self.save = False
+		self.last_recording_file = False
+
+	def save_recording_file(self, data=False):
+		if not data:
+			data = self.record_data
+		self.recording_file.write(json.dumps(data))
 
 	def grab_frames(self):
 		self.debug("grab_frames")
+		self.recording_name = "recordings/recording_{}.json".format(time())
+		self.recording_file = open(self.recording_name, "w")
 		while self.status:
-			self.record_data.append([o.toList() for o in self.phisics.objects])
+			data = [o.toList() for o in self.phisics.objects]
+			if self.mode == 2:
+				self.save_recording_file(data)
+			else:
+				self.record_data.append(data)
 			sleep(self.delay)
+		if self.save and not self.mode == 2:
+			self.save_recording_file()
+		self.recording_file.close()
 
 	def record(self):
 		self.debug("record")
@@ -247,8 +266,13 @@ class RECORDING:
 		self.phisics.objects = []
 		self.main.main_status = False
 		print("Playing...")
-		for objects in self.record_data:
-			controlls_actions = self.visuals.reload([Object(*o) for o in objects])
+		if self.mode == 2:
+			data = json.loads(open(self.recording_name, "r").read())
+		else:
+			data = self.record_data
+			
+		for objects in data:
+			controlls_actions = self.visuals.reload([Object(self.phisics, *o) for o in objects], self.recording_fps)
 		print("Finished playing")
 		self.phisics.pause = False
 		self.phisics.objects = self.objects_backup

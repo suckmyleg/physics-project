@@ -9,8 +9,6 @@ class VISUALS:
 	def draw_rect(self, o):
 		self.debug("draw_rect")
 
-			#self.show_message("x: {}   y: {}".format(o.x, o.y))
-
 		pygame.draw.rect(self.screen, o.color, pygame.Rect(o.x, o.y, o.height, o.width))
 
 	def draw_actual_speed(self, o):
@@ -32,15 +30,16 @@ class VISUALS:
 
 
 
-		#pygame.draw.line(self.screen, color, o.center_vector, [o.center_vector[0] + o.speed.x*100, o.center_vector[1]])
-		#pygame.draw.line(self.screen, color, o.center_vector, [o.center_vector[0], o.center_vector[1]+o.speed.y*100])
+		#pygame.draw.line(self.screen, color, o.center_vector, [o.center_vector[0] + o.speed.x*1, o.center_vector[1]])
+		#pygame.draw.line(self.screen, color, o.center_vector, [o.center_vector[0], o.center_vector[1]+o.speed.y*1])
 
-
+		
 		if self.show_speed_gravity_direction:
 
 			for i in o.speed.interactions:
 			
 				pygame.draw.line(self.screen, color, o.center_vector, [o.center_vector[0] + i[0]*1000, o.center_vector[1] + i[1]*1000])
+		
 
 	def draw_object(self, o):
 		self.debug("draw_object")
@@ -156,15 +155,17 @@ class VISUALS:
 		self.debug("clear_screen")
 		self.screen.fill(color)
 
-	def reload(self, objects=False):
+	def reload(self, objects=False, fps=False):
 		self.debug("reload")
+		if not fps:
+			fps = self.fps
 		actions = self.get_actions()
 		self.clear_screen()
 		if objects:
 			self.draw_objects(objects)
 		self.info()
 		self.update_screen()
-		self.clock.tick(self.fps)
+		self.clock.tick(fps)
 		return actions
 
 	def get_actions(self):
