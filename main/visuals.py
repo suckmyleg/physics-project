@@ -84,6 +84,7 @@ class VISUALS:
 	def info(self, show=False):
 		self.debug("info")
 		if self.show_debug or show:
+			self.controlls_info()
 			self.mouse_info()
 			self.screen_info()
 			self.phisics_info()
@@ -110,6 +111,16 @@ class VISUALS:
 		self.debug("debug_errors")
 		messages = copy.deepcopy(self.debug_c.errors)
 		self.show_messages_folder("Errors", messages, fun=self.show_errors)
+
+	def controlls_info(self):
+		self.debug("controlls_info")
+		data = ["selected: {}".format(self.main.controlls.object_selected)]
+		if self.main.controlls.object_selected:
+			data.append("angle: {}".format(self.main.controlls.object_selected.speed.angle))
+			data.append("speed: x:{} y:{}".format(self.main.controlls.object_selected.speed.x, self.main.controlls.object_selected.speed.y))
+			selected_start = [50, 50]
+			pygame.draw.line(self.screen, [100, 250, 100], selected_start,  [3*(self.main.controlls.object_selected.speed.x) + selected_start[0], 3*(self.main.controlls.object_selected.speed.y) + selected_start[1]])
+		self.show_messages_folder("Controlls", data)
 
 	def debug_info(self):
 		self.debug("debug_info")
@@ -213,8 +224,9 @@ class VISUALS:
 
 
 
-	def __init__(self, phisics, width=1080, height=720, debug=False, fps=60, show_debug=False):
+	def __init__(self, phisics, width=1080, height=720, debug=False, fps=60, show_debug=False, main=False):
 		self.phisics = phisics
+		self.main = main
 		self.show_debug = show_debug
 		self.debug_c = debug
 		self.debug = self.debug_c.get_debug("VISUALS")

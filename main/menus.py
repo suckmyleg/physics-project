@@ -229,7 +229,7 @@ class RECORDING:
 	def save_recording_file(self, data=False):
 		if not data:
 			data = self.record_data
-		self.recording_file.write(json.dumps(data))
+		print(json.dumps(data), file = self.recording_file)
 
 	def grab_frames(self):
 		self.debug("grab_frames")
@@ -242,8 +242,13 @@ class RECORDING:
 			else:
 				self.record_data.append(data)
 			sleep(self.delay)
-		if self.save and not self.mode == 2:
-			self.save_recording_file()
+		if self.mode == 2:
+			data_str = open(self.recording_name, "r").read()
+			data_str.split("\n")
+			self.recording_file.write(json.dumps(data_str))
+		else:
+			if self.save:
+				self.save_recording_file()
 		self.recording_file.close()
 
 	def record(self):

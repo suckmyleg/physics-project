@@ -8,6 +8,7 @@ import copy
 from json import loads
 from time import sleep
 
+
 class Simulation:
 	def main(self):
 		for i in range(100000000):
@@ -41,6 +42,8 @@ class Simulation:
 		self.actual_lvl = lvl
 		data = loads(open("data/{}.json".format(lvl), "r").read())
 
+		self.phisics.distance_scale = data["settings"]["scale"]
+
 		self.menus.loading_screen.load(self.phisics.add_objects, data["objects"])
 
 	def start(self):
@@ -63,7 +66,7 @@ class Simulation:
 		self.actual_lvl = False
 
 		self.phisics = PHISICS(self.Debug, self.get_fps)
-		self.visuals = VISUALS(self.phisics, debug=self.Debug, fps=fps)
+		self.visuals = VISUALS(self.phisics, debug=self.Debug, fps=fps, main=self)
 
 		self.controlls = CONTROLLS(keys_map, pygame, self.Debug, self)
 

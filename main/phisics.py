@@ -19,11 +19,14 @@ class Force:
 		self.angle = angle
 		self.interactions = []
 
-	def push_x_y(self, x, y):
+	def push_x_y(self, x, y, angle=False):
+		if not angle:
+			angle = self.conn.phisics.get_angle_from_x_y(x, y)
 		self.x += x
 		self.y += y
 		self.total_speed += x + y
 		self.interactions.append([x, y])
+		self.angle += (self.angle + angle)/2
 
 	def stop(self):
 		self.x = 0
@@ -31,11 +34,12 @@ class Force:
 
 	def reset(self):
 		self.interactions = []
+		self.angle = 0
 
 	def reload(self, fps=1):
 		if self.conn.phisics.precise_mode:
 			fps = 10000
-
+		fps = 1
 		if not fps == 0:
 			self.conn.x += self.x/fps
 			self.conn.y += self.y/fps
@@ -91,10 +95,9 @@ class Object:
 		return [self.name, self.id, self.x, self.y, [self.speed.x, self.speed.y],  self.width, self.height, self.mass, self.static, self.layer, self.color, self.on_collission]
 
 	def interact(self):
-		if not self.static:
-			for o in self.phisics.objects:
-				if not o == self:
-					self.interact_with_obj(o)
+		for o in self.phisics.objects:
+			if not o == self:
+				self.interact_with_obj(o)
 
 	def interact_with_obj(self, obj):
 		x = (obj.center_vector[0] - self.center_vector[0])*self.phisics.distance_scale
@@ -107,7 +110,7 @@ class Object:
 
 		r = abs(h)
 
-		if r > self.width/2:
+		if r > self.width:
 
 			i = 0
 
@@ -118,16 +121,18 @@ class Object:
 
 			fx, fy = self.phisics.fx_fy(i, angle)
 
-			self.push([fx, fy])
+			self.push([fx, fy], angle)
 
 		else:
-			if False and self.speed.total_speed < obj.speed.total_speed:
-				self.mass += obj.mass
-				self.height += 0.01
-				self.width += 0.01
-				self.color = [int((self.color[a]+obj.color[a])/2) for a in range(3)]
+			if False and obj.mass >= self.mass:
+				obj.mass += self.mass
+				obj.height += self.mass/obj.mass
+				obj.width += self.mass/obj.mass
+				obj.speed.x -= self.speed.x
+				obj.speed.y -= self.speed.y
+				obj.color = [int((self.color[a]+obj.color[a])/2) for a in range(3)]
 				#print(self.color)
-				self.phisics.remove(obj)
+				self.phisics.remove(self)
 
 	def stop(self):
 		self.speed.stop()
@@ -136,13 +141,14 @@ class Object:
 		self.speed = speed
 
 	def reload(self, fps=1):
-		self.speed.reset()
-		self.interact()
-		self.speed.reload(fps=fps)
-		self.reload_center()
+		if not self.static:
+			self.speed.reset()
+			self.interact()
+			self.speed.reload(fps=fps)
+			self.reload_center()
 
-	def push(self, speed):
-		self.speed.push_x_y(speed[0], speed[1])
+	def push(self, speed, angle):
+		self.speed.push_x_y(speed[0], speed[1], angle)
 
 	def remove(self):
 		self.phisics.remove(self)
@@ -226,18 +232,18 @@ class PHISICS:
 
 	def find_point_in_area(self, x1, y1, x2, y2, x, y):
 		self.debug("find_point_in_area")
-		if (x > x1 and x < x2 and y > y1 and y < y2):
+		if (x >= x1 and x <= x2 and y <= y1 and y >= y2):
 			return True
 		else:
 			return False
 
-	def point_in_area(self, area, x, y):
-		self.debug("point_in_area")
-		x1 = area["x"]
-		y1 = area["y"] + area["h"]
+	def point_in_obj(self, obj, x, y):
+		self.debug("point_in_obj")
+		x1 = obj.x
+		y1 = obj.y + obj.height
 
-		x2 = area["x"] + area["w"]
-		y2 = area["y"]
+		x2 =  obj.x +  obj.width
+		y2 = obj.y 
 
 		return self.find_point_in_area(x1, y1, x2, y2, x, y)
 
@@ -266,7 +272,7 @@ class PHISICS:
 			if exists:
 				speed = [o["collider"]["movement"]["x"], o["collider"]["movement"]["y"]]
 
-			o = Object(self, name="Object", x=o["visual"]["body"]["x"], y=o["visual"]["body"]["y"], static=o["collider"]["static"], speed=speed, width=5, height=5, mass=o["collider"]["mass"], on_collission=False, color=o["visual"]["color"])
+			o = Object(self, name="Object", x=o["visual"]["body"]["x"], y=o["visual"]["body"]["y"], static=o["collider"]["static"], speed=speed, width=o["collider"]["body"]["w"], height=o["collider"]["body"]["h"], mass=o["collider"]["mass"], on_collission=False, color=o["visual"]["color"])
 
 			self.objects.append(o)
 
@@ -284,7 +290,7 @@ class PHISICS:
 
 		self.fps = 0
 
-		self.precise_mode = True
+		self.precise_mode = False
 
 		self.distance_scale = 0.5
 

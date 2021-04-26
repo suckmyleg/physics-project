@@ -40,8 +40,8 @@ class CONTROLLS:
 		self.debug("reload_lvl")
 		self.main.reload_lvl()
 
-	def change_lvl(self):
-		self.main.load_lvl(6)
+	def change_lvl(self, lvl=6):
+		self.main.load_lvl(lvl)
 
 	def help(self):
 		self.debug("help")
@@ -51,7 +51,9 @@ class CONTROLLS:
 	def main_console(self):
 		self.debug("main_console")
 		while True:
-			self.execute_command()
+			r = self.execute_command()
+			if not r == None:
+				print(r)
 
 	def console(self):
 		self.debug("console")
@@ -65,6 +67,8 @@ class CONTROLLS:
 
 
 	#SIMULATION CONTROLLS
+
+
 
 	def reverse(self):
 		self.phisics.distance_scale *= -1
@@ -155,34 +159,50 @@ class CONTROLLS:
 
 	#PLAYER CONTROLLS
 
-	def object_move_forward(self, object_id=0):
-		if not self.pause and len(self.phisics.objects) > 0:
+	def click(self, fun, x, y):
+		obj = False
+
+		for o in self.phisics.objects:
+			if self.phisics.point_in_obj(o, x, y):
+				obj = o
+				self.object_selected = o
+				break
+
+		if not obj:
+			fun(x, y)
+
+
+	def object_move_forward(self):
+		if not self.pause and self.object_selected:
 			self.debug("object_move_forward")
-			self.phisics.objects[object_id].push([0, -0.1])
+			self.object_selected.push([0, -0.01])
 
-	def object_move_back(self, object_id=0):
-		if not self.pause and len(self.phisics.objects) > 0:
+	def object_move_back(self):
+		if not self.pause and self.object_selected:
 			self.debug("object_move_back")
-			self.phisics.objects[object_id].push([0, 0.1])
+			self.object_selected.push([0, 0.01])
 
-	def object_move_left(self, object_id=0):
-		if not self.pause and len(self.phisics.objects) > 0:
+	def object_move_left(self):
+		if not self.pause and self.object_selected:
 			self.debug("object_move_left")
-			self.phisics.objects[object_id].push([-0.1, 0])
+			self.object_selected.push([-0.01, 0])
 
-	def object_move_right(self, object_id=0):
-		if not self.pause and len(self.phisics.objects) > 0:
+	def object_move_right(self):
+		if not self.pause and self.object_selected:
 			self.debug("object_move_right")
-			self.phisics.objects[object_id].push([0.1, 0])
+			self.object_selected.push([0.01, 0])
 
 	def spawn_new_black_hole(self):
 		self.debug("spawn_new_black_hole")
-		self.spawn_new_rect(mass=100000000000000, color=[50, 120, 150], static=True)
+		self.spawn_new_rect(mass=100000000000000, color=[50, 120, 150], static=True, height=20, width=20)
 
-	def spawn_new_rect(self, x=False, y=False, mass=1000000, speedx=0, speedy=0, color=[150,1,250], static=False):
+	def spawn_new_rect(self, x=False, y=False, mass=100000000, speedx=0, speedy=0, color=[150,1,250], static=False, height=5, width=5):
 		self.debug("spawn_new_rect")
 		if x == False or y == False:
 			x, y = self.visuals.get_mouse_pos()
+		if self.object_selected:
+			speedx = self.object_selected.speed.x
+			speedy = self.object_selected.speed.y
 
 		rect = {
     "visual": {
@@ -192,8 +212,8 @@ class CONTROLLS:
       "body": {
         "x": x,
         "y": y,
-        "h": 10,
-        "w": 10,
+        "h": height,
+        "w": width,
         "color": False
       }
     },
@@ -208,8 +228,8 @@ class CONTROLLS:
       "body": {
         "x": x,
         "y": y,
-        "w": 10,
-        "h": 10
+        "w": width,
+        "h": height
       }
     }
   }
@@ -258,15 +278,24 @@ class CONTROLLS:
 
 	def get_function_from_command(self, command):
 		self.debug("get_function_from_command")
-		try:
-			c = self.commands[command]
-		except:
+		clas = self
+		for command in command.split("."):
 			try:
-				c = getattr(self, command)
-				self.commands[command] = c
+				c = self.commands[command]
+				clas = c
 			except:
-				c = False
+				try:
+					c = getattr(clas, command)
+					self.commands[command] = c
+					clas = c
+				except:
+					c = False
 		return c
+
+	#https://stackoverflow.com/questions/52753398/how-to-extract-integer-or-float-from-string
+	def parseint(self, string):
+		m = re.search(r"(\d*\.?\d*)", string)
+		return m.group() if m else None
 
 	def execute_command(self, command=False):
 		self.debug("execute_command")
@@ -280,7 +309,7 @@ class CONTROLLS:
 
 				for a in d:
 					try:
-						a = float(a)
+						a = parseint(a)
 					except:
 						pass
 					args.append(a)
@@ -291,10 +320,13 @@ class CONTROLLS:
 
 		if c:
 			if len(args) > 0:
-				c(*args)
+				try:
+					return c(*args)
+				except Exception as e:
+					self.debug("execute_command", error=e)
 			else:
 				try:
-					c()
+					return c()
 				except Exception as e:
 					self.debug("execute_command", error=e)
 
@@ -348,7 +380,7 @@ class CONTROLLS:
 					else:
 						if "click" in data["type"]:
 							x, y = self.visuals.get_mouse_pos()
-							data["function"](x, y)
+							self.click(data["function"], x, y)
 						else:
 							if event_type in data["type"]:
 								data["function"]()
@@ -390,5 +422,7 @@ class CONTROLLS:
 		self.actions = []
 
 		self.pause = False
+
+		self.object_selected = False
 
 		self.console()

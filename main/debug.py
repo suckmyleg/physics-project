@@ -2,6 +2,7 @@ from time import time, sleep
 from json import dumps
 import inspect
 import platform, socket, re, uuid, psutil, logging
+import threading
 
 
 class Minidebug:
@@ -188,7 +189,7 @@ class Debug:
 
 		i1 = "{}.{}{} ".format(main, function_name, self.clean_args(args))
 
-		i2 = self.space(self.space(f"t:[{self.ceros(self.time_passed_float())}]", f"m:[{self.media()}/s]", space_length=12), f"mi:[{self.interval_media()}/s]", space_length=25)
+		i2 = self.space(self.space(f"t:[{self.ceros(self.time_passed_float())}]", "m:[{}/s]".format(self.media()), space_length=12), f"mi:[{self.interval_media()}/s]", space_length=25)
 
 		self.pr(self.space(i1, i2, space_length=45), main, function_name, args, error=error, debug_reactive=debug_reactive)
 
@@ -257,6 +258,11 @@ class Debug:
 			mode = self.debug_mode
 		d = Minidebug(main, mode, reactive, self.debug)
 		return d.debug
+
+	def info(self):
+		return {
+		"n_threads":threading.active_count()
+		}
 
 	def __init__(self, main, debug_active, log=False, debug_mode=0, debug_reactive="%T -- %M.%F(%A) %I", interval_time=5, output_console=False, output_file=False):
 		self.main = main
