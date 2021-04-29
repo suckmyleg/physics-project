@@ -455,7 +455,7 @@ class CONTROLLS:
 		self.commands = {}
 
 		for a in dir(self):
-			if not "_" == a[0] and callable(a):
+			if not "__" in a and callable(getattr(self, a)):
 				self.commands[a] = getattr(self, a)
 
 		self.active_commands = [] 
