@@ -5,7 +5,7 @@ debug_mode = 5
 
 debug_reactive = "Args: %A Id: %I Function_name: %F\n"
 
-log = True
+log = False
 
 console_log = False
 
@@ -37,12 +37,13 @@ keys_map = [
 		["k_hold", "k_c", "input_console"],
 		["k_hold", "k_i", "switch_objects_speeds"],
 		["k_hold", "k_b", "spawn_new_black_hole"],
-		["k_hold", "k_n", "spawn_new_rect"]
+		["k_hold", "k_n", "spawn_new_rect"],
+		["k_hold", "k_t", "main.start"]
 		
 
 		]
 
-Simulation = main.Simulation(False, log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, fps=6000, keys_map=keys_map, output_console=console_log, output_file=True, debug_interval_time=10)
+Simulation = main.Simulation(log, log=log, debug_mode=debug_mode, debug_reactive=debug_reactive, fps=6000, keys_map=keys_map, output_console=console_log, output_file=True, debug_interval_time=10)
 
 Simulation.setup()
 

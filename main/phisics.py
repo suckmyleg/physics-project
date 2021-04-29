@@ -143,8 +143,8 @@ class Object:
 	def reload(self, fps=1):
 		if not self.static:
 			self.speed.reset()
-			self.interact()
 			self.speed.reload(fps=fps)
+			self.interact()
 			self.reload_center()
 
 	def push(self, speed, angle):

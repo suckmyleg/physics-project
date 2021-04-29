@@ -189,7 +189,7 @@ class Debug:
 
 		i1 = "{}.{}{} ".format(main, function_name, self.clean_args(args))
 
-		i2 = self.space(self.space(f"t:[{self.ceros(self.time_passed_float())}]", "m:[{}/s]".format(self.media()), space_length=12), f"mi:[{self.interval_media()}/s]", space_length=25)
+		i2 = self.space(self.space("t:[{}]".format(self.ceros(self.time_passed_float())), "m:[{}/s]".format(self.media()), space_length=12), "mi:[{}/s]".format(self.interval_media()), space_length=25)
 
 		self.pr(self.space(i1, i2, space_length=45), main, function_name, args, error=error, debug_reactive=debug_reactive)
 

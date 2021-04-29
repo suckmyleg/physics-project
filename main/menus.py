@@ -45,19 +45,21 @@ class Loading_screen:
 
 
 	def load(self, fun, objects, title="Loading"):
-		self.phisics.pause = True
-		t = Thread(target=self.start, args=(len(objects), title))
-		t.start()
+		if not self.loading:
+			self.loading = True
+			self.phisics.pause = True
+			t = Thread(target=self.start, args=(len(objects), title))
+			t.start()
 
-		try:
+			try:
 
-			fun(objects, fun=self.add_loaded, fun_info=self.change_loading_message)
+				fun(objects, fun=self.add_loaded, fun_info=self.change_loading_message)
 
-		except Exception as e:
-			self.change_loading_message("Error loading\n{}".format(e))
-			self.debug("load", error=e)
+			except Exception as e:
+				self.change_loading_message("Error loading\n{}".format(e))
+				self.debug("load", error=e)
 
-		self.loading = False
+			self.loading = False
 
 	def start(self, to_load, title):
 		self.debug("start")

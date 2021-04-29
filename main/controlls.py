@@ -46,7 +46,7 @@ class CONTROLLS:
 	def help(self):
 		self.debug("help")
 		for k in self.commands.keys():
-			print(f"  --{k}")
+			print("  --{}".format(k))
 
 	def main_console(self):
 		self.debug("main_console")
@@ -153,6 +153,34 @@ class CONTROLLS:
 		self.debug("more_distance")
 		self.phisics.distance_scale += 0.01
 
+	def set_distance(self):
+		self.debug("set_distance")
+		try:
+			self.phisics.distance_scale = float(input("Distance: "))
+		except:
+			pass		
+
+	def set_mass(self):
+		self.debug("set_mass")
+		try:
+			self.selected_mass = float(input("Mass: "))
+		except:
+			pass	
+
+	def set_speed_x(self):
+		self.debug("set_speed_x")
+		try:
+			self.speed_x = float(input("Speed_x: "))
+		except:
+			pass	
+
+	def set_speed_y(self):
+		self.debug("set_speed_y")
+		try:
+			self.speed_y = float(input("Speed_y: "))
+		except:
+			pass	
+
 	def less_distance(self):
 		self.debug("less_distance")
 		self.phisics.distance_scale -= 0.01
@@ -192,17 +220,32 @@ class CONTROLLS:
 			self.debug("object_move_right")
 			self.object_selected.push([0.01, 0])
 
+	def spawn_new_sun(self):
+		self.debug("spawn_new_sun")
+		self.spawn_new_rect(mass=300000000000000, color=[250,250,1], static=False, height=5, width=5)
+
 	def spawn_new_black_hole(self):
 		self.debug("spawn_new_black_hole")
-		self.spawn_new_rect(mass=100000000000000, color=[50, 120, 150], static=True, height=20, width=20)
+		self.spawn_new_rect(mass=100000000000000, color=[50, 120, 150], static=True, height=2, width=2)
 
-	def spawn_new_rect(self, x=False, y=False, mass=100000000, speedx=0, speedy=0, color=[150,1,250], static=False, height=5, width=5):
+	def spawn_new_rect(self, x=False, y=False, mass=False, speedx=0, speedy=0, color=[150,1,250], static=False, height=5, width=5):
 		self.debug("spawn_new_rect")
 		if x == False or y == False:
 			x, y = self.visuals.get_mouse_pos()
 		if self.object_selected:
 			speedx = self.object_selected.speed.x
 			speedy = self.object_selected.speed.y
+
+		if self.speed_x:
+			speedx = self.speed_x
+
+		if self.speed_y:
+			speedy = self.speed_y
+
+		if not mass:
+			mass = self.selected_mass
+
+
 
 		rect = {
     "visual": {
@@ -422,6 +465,12 @@ class CONTROLLS:
 		self.actions = []
 
 		self.pause = False
+
+		self.selected_mass = 100000000
+
+		self.speed_x = False
+
+		self.speed_y = False
 
 		self.object_selected = False
 
